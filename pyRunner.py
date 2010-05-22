@@ -511,7 +511,7 @@ class level(object):
 
             
 #debug function
-_debug = True
+_debug = False
 _die = True
 def debug(printstring):
     if _debug:
@@ -585,10 +585,10 @@ def main():
     gunnerGroup = pygame.sprite.RenderUpdates()
     ##LEVEL CREATION AND DESIGN
     mainLevelManager.add(level({blockGroup:[3,100,200,75,True],cubeGroup:[1,700,2000,300,True],\
-                                invGroup:[1,2000,5000,300,False],shieldGroup:[1,1000,3000,300,False],turretGroup:[1,1000,2000,300,True]\
+                                invGroup:[1,2000,5000,300,False],shieldGroup:[1,1000,3000,300,False],turretGroup:[1,1000,2000,300,False]\
                                 ,gunGroup:[1,1000,2000,300,False]},6,800))
-    mainLevelManager.add(level({},7,800))
-    mainLevelManager.add(level({shieldGroup:[1,4000,7000,300,True]},8,2000))
+    mainLevelManager.add(level({},7,1200))
+    mainLevelManager.add(level({shieldGroup:[1,4000,7000,300,True],turretGroup:[1,1000,2000,300,True]},8,2000))
     mainLevelManager.add(level({invGroup:[1,5000,10000,300,True],gunGroup:[1,1000,2000,300,True]},9,3200))
     #create a shield indicator
     shieldsInd = shieldIndicator()
