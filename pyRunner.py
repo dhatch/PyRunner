@@ -29,6 +29,9 @@ global effectsGroup
 #David:
 #-fixed significant bug where program would slow down when many cubes
 #were picked up in a row. was an error in pygame.sprite.GroupSingle class
+##CHANGELOG 0.8: 
+#Brian:
+#-added in turrets,gun and bullets
 global bulletGroup
 global gunnerGroup
 global rungroup
