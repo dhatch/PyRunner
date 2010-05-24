@@ -286,7 +286,7 @@ class gun(scroller):
         self.rect.centerx = self.x
         self.rect.centery = self.y
         scroller.__init__(self)
-        self._dx = 10
+        self._dx = 15
         pygame.draw.rect(self.image, self.color,self.rect,3)
         self.shots = 10
     def update(self):
@@ -587,12 +587,12 @@ def main():
     global gunnerGroup
     gunnerGroup = pygame.sprite.RenderUpdates()
     ##LEVEL CREATION AND DESIGN
-    mainLevelManager.add(level({blockGroup:[3,100,200,75,True],cubeGroup:[1,700,2000,300,True],\
+    mainLevelManager.add(level({blockGroup:[2,100,200,75,True],cubeGroup:[1,700,2000,300,True],\
                                 invGroup:[1,2000,5000,300,False],shieldGroup:[1,1000,3000,300,False],turretGroup:[1,1000,2000,300,False]\
                                 ,gunGroup:[1,1000,2000,300,False]},6,800))
-    mainLevelManager.add(level({},7,1200))
-    mainLevelManager.add(level({shieldGroup:[1,4000,7000,300,True],turretGroup:[1,2000,4000,300,True]},8,2000))
-    mainLevelManager.add(level({invGroup:[1,5000,10000,300,True],gunGroup:[1,1000,2000,300,True]},9,3200))
+    mainLevelManager.add(level({},7,800))
+    mainLevelManager.add(level({shieldGroup:[1,4000,7000,300,True]},8,800))
+    mainLevelManager.add(level({blockGroup:[3,100,200,75,True],invGroup:[1,5000,10000,300,True],turretGroup:[1,2000,4000,300,True],gunGroup:[1,3000,7000,300,True]},9,3200))
     #create a shield indicator
     shieldsInd = shieldIndicator()
     shieldsInd.setShield(3)
