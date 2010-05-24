@@ -1,4 +1,6 @@
-For 0.9
 -Readme
 -Level Design Enhancements
 -Sound
+-Gun Ammo indicator
+-Fix turret system
+-Try to do incremental movement speed
