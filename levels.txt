@@ -1,0 +1,12 @@
+LEVELS-
+1) Blocks and score cubes
+2) Speed increase
+3) Block increase
+4) Speed Increase, enable shields
+5) Enable Gun
+6) Enable Invincibility
+7) Speed Increase
+8) Turret Frequency Increase
+9) Blocks Disable
+10)Shields
+11)Speed Increase, Blocks Enable
