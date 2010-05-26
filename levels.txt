@@ -10,3 +10,5 @@ LEVELS-
 9) Blocks Disable
 10)Shields
 11)Speed Increase, Blocks Enable
+
+Powerups, especially invincibility rez too often

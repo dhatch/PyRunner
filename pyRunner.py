@@ -514,8 +514,8 @@ class level(object):
 
             
 #debug function
-_debug = False
-_die = True
+_debug = True
+_die = False
 def debug(printstring):
     if _debug:
         print printstring
@@ -591,8 +591,14 @@ def main():
                                 invGroup:[1,2000,5000,300,False],shieldGroup:[1,1000,3000,300,False],turretGroup:[1,1000,2000,300,False]\
                                 ,gunGroup:[1,1000,2000,300,False]},6,800))
     mainLevelManager.add(level({},7,800))
+    mainLevelManager.add(level({blockGroup:[3,100,200,75,True]},7,1200))
     mainLevelManager.add(level({shieldGroup:[1,4000,7000,300,True]},8,800))
-    mainLevelManager.add(level({blockGroup:[3,100,200,75,True],invGroup:[1,5000,10000,300,True],turretGroup:[1,2000,4000,300,True],gunGroup:[1,3000,7000,300,True]},9,3200))
+    mainLevelManager.add(level({gunGroup:[1,3000,7000,300,True]},8,600))
+    mainLevelManager.add(level({invGroup:[1,5000,10000,300,True]},8,1200))
+    mainLevelManager.add(level({turretGroup:[1,3000,5000,300,True]},8,10000))
+    mainLevelManager.add(level({turretGroup:[1,3000,4000,300,True]},8,5000))
+    mainLevelManager.add(level({blockGroup:[3,100,200,75,False],shieldGroup:[1,1000,2500,300,True]},9,3200))
+    mainLevelManager.add(level({blockGroup:[3,75,200,75,True]},9,3200))
     #create a shield indicator
     shieldsInd = shieldIndicator()
     shieldsInd.setShield(3)
