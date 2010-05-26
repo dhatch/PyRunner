@@ -32,6 +32,9 @@ global effectsGroup
 ##CHANGELOG 0.8: 
 #Brian:
 #-added in turrets,gun and bullets
+##CHANGELOG 0.9:
+#David:
+#-inserted modified and improved levling code
 global bulletGroup
 global gunnerGroup
 global rungroup
