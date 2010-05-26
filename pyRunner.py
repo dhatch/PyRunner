@@ -517,8 +517,8 @@ class level(object):
 
             
 #debug function
-_debug = True
-_die = False
+_debug = False
+_die = True
 def debug(printstring):
     if _debug:
         print printstring
