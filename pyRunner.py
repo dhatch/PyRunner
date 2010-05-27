@@ -524,16 +524,20 @@ def debug(printstring):
         print printstring
 
 
-def main():
-    ##INITIALIZATION CODE    
-    global mainLevelManager
-    mainLevelManager = levelManager()
+def init():
+    global screen
     screen = None
     #create screen
     if(_debug):
         screen = pygame.display.set_mode((600, 820))
     else:
         screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
+
+def main():
+    init()
+    ##INITIALIZATION CODE    
+    global mainLevelManager
+    mainLevelManager = levelManager()
     global gunner
     gunner = pygame.image.load(os.path.join(\
             "Resources","gunner.bmp"))
