@@ -39,6 +39,39 @@ global bulletGroup
 global gunnerGroup
 global rungroup
 global turretGroup
+
+##VARS
+##VARS DEFINED IN init()
+screen = None
+##VARS DEFINED IN gameInit()
+mainLevelManager = None
+gunner = None
+background = None
+clock = None
+keepGoing = False
+runner1 = None
+rungroup = None
+blockMinHeight = None
+blockMaxHeight = None
+#GROUPS
+blockGroup = None
+cubeGroup = None
+invGroup = None
+shieldGroup = None
+turretGroup = None
+gunGroup = None
+effectsGroup = None
+bulletGroup = None
+gunnerGroup = None
+shieldsInd = None
+speedInd = None
+score = None
+frame_count = None
+displayFrame = None
+target_rate = None
+pause = None
+invInd = None
+
 class runner(pygame.sprite.Sprite):
     def __init__(self, screen):
         pygame.sprite.Sprite.__init__(self)
@@ -517,12 +550,11 @@ class level(object):
 
             
 #debug function
-_debug = False
+_debug = True
 _die = True
 def debug(printstring):
     if _debug:
         print printstring
-
 
 def init():
     global screen
@@ -533,8 +565,8 @@ def init():
     else:
         screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
 
-def main():
-    init()
+def gameInit():
+    global screen
     ##INITIALIZATION CODE    
     global mainLevelManager
     mainLevelManager = levelManager()
@@ -626,9 +658,12 @@ def main():
     target_rate = 70
     #the next chosen row
     #tracking of last row
-    lastRowPosition = -1
     pause = False
     invInd = progressIndicator((255,255,255),"")
+
+def main():
+    init()
+    gameInit()
     #run loop
     while keepGoing or pause:
         while keepGoing:
