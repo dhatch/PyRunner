@@ -10,7 +10,7 @@ import math
 if platform.system() == 'Windows':
     os.environ['SDL_VIDEODRIVER'] = 'windib'
 pygame.init()
-global effectsGroup
+
 ###OPTIMIZATION DOTO
 # check collision
 # use render groups and only update needed
@@ -35,41 +35,64 @@ global effectsGroup
 ##CHANGELOG 0.9:
 #David:
 #-inserted modified and improved levling code
-global bulletGroup
-global gunnerGroup
-global rungroup
-global turretGroup
 
 ##VARS
 ##VARS DEFINED IN init()
+global screen
 screen = None
 ##VARS DEFINED IN gameInit()
+global mainLevelManager
 mainLevelManager = None
+global gunner
 gunner = None
+global background
 background = None
+global clock
 clock = None
+global keepGoing
 keepGoing = False
+global runner1
 runner1 = None
+global rungroup
 rungroup = None
+global blockMinHeight
 blockMinHeight = None
+global blockMaxHeight
 blockMaxHeight = None
 #GROUPS
+global blockGroup
 blockGroup = None
+global cubeGroup
 cubeGroup = None
+global invGroup
 invGroup = None
+global shieldGroup
 shieldGroup = None
+global turretGroup
 turretGroup = None
+global gunGroup
 gunGroup = None
+global effectsGroup
 effectsGroup = None
+global bulletGroup
 bulletGroup = None
+global gunnerGroup
 gunnerGroup = None
+global shieldsInd
 shieldsInd = None
+global speedInd
 speedInd = None
+global score
 score = None
+global frame_count
 frame_count = None
+global displayFrame
 displayFrame = None
+global target_rate
 target_rate = None
+global pause
 pause = None
+global invInd
 invInd = None
 
 class runner(pygame.sprite.Sprite):
@@ -557,16 +580,13 @@ def debug(printstring):
         print printstring
 
 def init():
-    global screen
-    screen = None
     #create screen
+    global screen
     if(_debug):
         screen = pygame.display.set_mode((600, 820))
     else:
         screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
-
 def gameInit():
-    global screen
     ##INITIALIZATION CODE    
     global mainLevelManager
     mainLevelManager = levelManager()
@@ -575,14 +595,18 @@ def gameInit():
             "Resources","gunner.bmp"))
     gunner = gunner.convert()
     gunner.set_colorkey((0,0,0))
+    global background
     background = pygame.Surface((screen.get_width(), screen.get_height()))
     pygame.draw.rect(background, (0,0,0), background.get_rect())
     #only nessecary if not fullscreen
     pygame.display.set_caption("pyRunner 2D")
+    global clock
     clock = pygame.time.Clock()
+    global keepGoing
     keepGoing = True
     #create our runner and a group to hold it
     runner1 = runner(screen)
+    global rungroup
     rungroup = pygame.sprite.GroupSingle(runner1)
     #calculate window borders based on size
     global max_height
@@ -607,11 +631,17 @@ def gameInit():
                      pygame.rect.Rect(0, min_height,\
                                       screen.get_width(), 0))
     #choose block border heights
+    global blockMinHeight
     blockMinHeight = min_height - 45
+    global blockMaxHeight
     blockMaxHeight = max_height + 45
     ##INITIALIZE REZ GROUPS
     #initialize a block group of our randomRezGroup class (subclass of pygame.
     #sprite.group
+    global blockGroup
+    global cubeGroup
+    global invGroup
+    global shieldGroup
     blockGroup = randomRezGroup(block,maxRezHeight=blockMaxHeight,minRezHeight=blockMinHeight)
     cubeGroup = randomRezGroup(scoreCube,maxRezHeight=blockMaxHeight,minRezHeight=blockMinHeight)
     invGroup = randomRezGroup(invCube,maxRezHeight=blockMaxHeight,minRezHeight=blockMinHeight)
@@ -639,8 +669,10 @@ def gameInit():
     mainLevelManager.add(level({blockGroup:[3,100,200,75,False],shieldGroup:[1,450,600,300,True]},8,1000))
     mainLevelManager.add(level({blockGroup:[3,75,200,75,True],shieldGroup:[1,4000,7000,300,True]},9,3200))
     #create a shield indicator
+    global shieldsInd
     shieldsInd = shieldIndicator()
     shieldsInd.setShield(3)
+    global speedInd
     speedInd = progressIndicator((0,255,0),"Speed:   ")
     mainLevelManager.setIndicator(speedInd)
     #make first level active
@@ -651,19 +683,53 @@ def gameInit():
     global score
     score = 0
     #keep track of the number of frames
+    global frame_count
     frame_count = 0
     #do we want to display a framerate?
+    global displayFrame
     displayFrame = False
     #target frame rate
+    global target_rate
     target_rate = 70
     #the next chosen row
     #tracking of last row
+    global pause
     pause = False
+    global invInd
     invInd = progressIndicator((255,255,255),"")
 
 def main():
     init()
     gameInit()
+    global screen
+    ##VARS DEFINED IN gameInit()
+    global mainLevelManager
+    global gunner
+    global background
+    global clock
+    global keepGoing
+    global runner1
+    global rungroup
+    global blockMinHeight
+    global blockMaxHeight
+    #GROUPS
+    global blockGroup
+    global cubeGroup
+    global invGroup
+    global shieldGroup
+    global turretGroup
+    global gunGroup
+    global effectsGroup
+    global bulletGroup
+    global gunnerGroup
+    global shieldsInd
+    global speedInd
+    global score
+    global frame_count
+    global displayFrame
+    global target_rate
+    global pause
+    global invInd
     #run loop
     while keepGoing or pause:
         while keepGoing:
@@ -802,7 +868,6 @@ def main():
                                                     clock.get_fps())),\
                                                    True, (255,255,255))
                 #find the rect for the new surface
-
                 x = 0
                 y = screen.get_height()-frameSurface.get_height()
                 frameRateRect = frameSurface.get_rect().move(x,y)
