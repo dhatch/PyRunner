@@ -58,18 +58,21 @@ class runner(pygame.sprite.Sprite):
         self.isvisible = True #are we actually visible
         self.flashRate = 8 #number of frames it will take to toggle the flash
         self.inv = False
-        self.gun = False
+        self.gun = 0
         self.last_shot = 10
         self.shots = 0
         self.invCount = 800
     def hit(self):
         if not self.inv:
-            if not self.flash: #if not already flasshing from a collision 
-                self.shield -= 1 #decrease shield
-                self.flash = True #start flashing
-                self.count = 96 #for 96 frames
-                effectsGroup.add(fadeEffect((255,0,0)))
-                mainLevelManager.fallback(400)
+            if not self.flash: #if not already flasshing from a collision
+                self.shield -= 1
+                if not self.shield == 0:
+                    
+                    debug("play")
+                    self.flash = True #start flashing
+                    self.count = 96 #for 96 frames
+                    effectsGroup.add(fadeEffect((255,0,0)))
+                    mainLevelManager.fallback(400)
     def update(self):
         #set our own dy to scroller.dx minus 2
         self.dy = scroller.dx - 2
@@ -80,10 +83,15 @@ class runner(pygame.sprite.Sprite):
         if key[K_DOWN]:
             self.rect.centery += self.dy
         if key[K_SPACE]:
-            if self.gun == True:
-                if self.shots > 10:
+            if self.gun > 1:
+                debug("reload")
+                self.shots = 0
+                self.gun = 1
+            elif self.gun == 1:
+                debug(self.gun)
+                if self.shots > 9:
                     self.shots = 0
-                    self.gun = False
+                    self.gun = 0
                 else:
                     self.last_shot +=1
                     if self.last_shot >= 10:
@@ -266,8 +274,8 @@ class gunCube(cube):
         self.color=(255,0,0)
         cube.__init__(self,y)
     def hit(self):
-        rungroup.sprite.gun = True
-        debug(str(runner.gun))
+        rungroup.sprite.gun += 1
+        debug(str(rungroup.sprite.gun))
 
 class invCube(cube):
     def __init__(self,y):
@@ -278,6 +286,7 @@ class shieldCube(cube):
     def __init__(self,y):
         self.color = (0,128,255)
         cube.__init__(self,y)
+global rungroup
 class gun(scroller):
     def __init__(self,y,x):
         self.image = pygame.Surface((10,10))
@@ -296,7 +305,8 @@ class gun(scroller):
         scroller.update(self)
         self.rect.centerx += self._dx
         if self.shots == 0:
-            runner.gun = False
+            debug(int(rungroup.sprite.gun))
+            runner.gun = 0
         self.shots -= 1
         if self.rect.centerx > pygame.display.get_surface().get_width():
             self.kill()
@@ -517,7 +527,7 @@ class level(object):
 
             
 #debug function
-_debug = False
+_debug = True
 _die = True
 def debug(printstring):
     if _debug:
@@ -547,6 +557,7 @@ def main():
     keepGoing = True
     #create our runner and a group to hold it
     runner1 = runner(screen)
+    global rungroup
     rungroup = pygame.sprite.GroupSingle(runner1)
     #calculate window borders based on size
     global max_height
@@ -718,7 +729,7 @@ def main():
                 pygame.sprite.groupcollide(gunGroup,invGroup,False,True)
                 collided = pygame.sprite.spritecollide(rungroup.sprite,gunGroup,True)
                 for x in collided:
-                    rungroup.sprite.gun = True
+                    rungroup.sprite.gun += 1
             #increment distance
             score += 0.5
             #increment the number of frames
