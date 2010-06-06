@@ -7,10 +7,11 @@ import platform
 import random
 import sys
 import math
+from menu import *
 if platform.system() == 'Windows':
     os.environ['SDL_VIDEODRIVER'] = 'windib'
 pygame.init()
-global effectsGroup
+
 ###OPTIMIZATION DOTO
 # check collision
 # use render groups and only update needed
@@ -35,10 +36,40 @@ global effectsGroup
 ##CHANGELOG 0.9:
 #David:
 #-inserted modified and improved levling code
-global bulletGroup
-global gunnerGroup
-global rungroup
-global turretGroup
+
+##VARS
+##VARS DEFINED IN init()
+screen = None
+##VARS DEFINED IN gameInit()
+mainLevelManager = None
+gunner = None
+background = None
+clock = None
+keepGoing = False
+runner1 = None
+max_height = None
+min_height = None
+rungroup = None
+blockMinHeight = None
+blockMaxHeight = None
+#GROUPS
+blockGroup = None
+cubeGroup = None
+invGroup = None
+shieldGroup = None
+turretGroup = None
+gunGroup = None
+effectsGroup = None
+bulletGroup = None
+gunnerGroup = None
+shieldsInd = None
+speedInd = None
+score = None
+frame_count = None
+displayFrame = None
+target_rate = None
+invInd = None
+
 class runner(pygame.sprite.Sprite):
     def __init__(self, screen):
         pygame.sprite.Sprite.__init__(self)
@@ -286,7 +317,6 @@ class shieldCube(cube):
     def __init__(self,y):
         self.color = (0,128,255)
         cube.__init__(self,y)
-global rungroup
 class gun(scroller):
     def __init__(self,y,x):
         self.image = pygame.Surface((10,10))
@@ -533,18 +563,48 @@ def debug(printstring):
     if _debug:
         print printstring
 
-
-def main():
-    ##INITIALIZATION CODE    
-    global mainLevelManager
-    mainLevelManager = levelManager()
-    screen = None
+def init():
     #create screen
+    global screen
     if(_debug):
         screen = pygame.display.set_mode((600, 820))
     else:
         screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
+    # Ignore mouse motion (greatly reduces resources when not needed)
+    pygame.event.set_blocked(pygame.MOUSEMOTION)
+def gameInit():
+    global screen
+    ##VARS DEFINED IN gameInit()
+    global mainLevelManager
     global gunner
+    global background
+    global clock
+    global keepGoing
+    global runner1
+    global rungroup
+    global max_height
+    global min_height
+    global blockMinHeight
+    global blockMaxHeight
+    #GROUPS
+    global blockGroup
+    global cubeGroup
+    global invGroup
+    global shieldGroup
+    global turretGroup
+    global gunGroup
+    global effectsGroup
+    global bulletGroup
+    global gunnerGroup
+    global shieldsInd
+    global speedInd
+    global score
+    global frame_count
+    global displayFrame
+    global target_rate
+    global invInd
+    ##INITIALIZATION CODE    
+    mainLevelManager = levelManager()
     gunner = pygame.image.load(os.path.join(\
             "Resources","gunner.bmp"))
     gunner = gunner.convert()
@@ -557,11 +617,8 @@ def main():
     keepGoing = True
     #create our runner and a group to hold it
     runner1 = runner(screen)
-    global rungroup
     rungroup = pygame.sprite.GroupSingle(runner1)
     #calculate window borders based on size
-    global max_height
-    global min_height
     #create window borders
     height = screen.get_height()
     border_height = (height-800)/2.0
@@ -591,14 +648,10 @@ def main():
     cubeGroup = randomRezGroup(scoreCube,maxRezHeight=blockMaxHeight,minRezHeight=blockMinHeight)
     invGroup = randomRezGroup(invCube,maxRezHeight=blockMaxHeight,minRezHeight=blockMinHeight)
     shieldGroup = randomRezGroup(shieldCube,maxRezHeight=blockMaxHeight,minRezHeight=blockMinHeight)
-    global turretGroup
     turretGroup = randomRezGroup(turret,maxRezHeight = blockMaxHeight,minRezHeight=blockMinHeight)
     gunGroup = randomRezGroup(gunCube,maxRezHeight = blockMaxHeight,minRezHeight = blockMinHeight)
-    global effectsGroup
     effectsGroup = WorkingSingle() #group to store effects in
-    global bulletGroup
     bulletGroup = pygame.sprite.RenderUpdates()
-    global gunnerGroup
     gunnerGroup = pygame.sprite.RenderUpdates()
     ##LEVEL CREATION AND DESIGN
     mainLevelManager.add(level({blockGroup:[2,100,200,75,True],cubeGroup:[1,700,2000,300,True],\
@@ -623,7 +676,6 @@ def main():
     #blit the background to the screen to start with
     screen.blit(background, (0,0))
     #create a variable to store distance
-    global score
     score = 0
     #keep track of the number of frames
     frame_count = 0
@@ -633,207 +685,305 @@ def main():
     target_rate = 70
     #the next chosen row
     #tracking of last row
-    lastRowPosition = -1
-    pause = False
     invInd = progressIndicator((255,255,255),"")
-    #run loop
-    while keepGoing or pause:
-        while keepGoing:
-            #check to make sure our runner still exists
-            if not rungroup.sprite:
-                keepGoing = False
-            #target_rate is the max possible frame rate
-            clock.tick(target_rate)
-            #check how long the user has beem playing and if they have\
-            #been playing long enough make the speed faster
-            ##LEVELING CODE[OLD]##
-    ##            if frame_count == 800: #Level 2
-    ##                scroller.dx += 1
-    ##                debug("lvl2")
-    ##            elif frame_count == 1200: #Level 3
-    ##                scroller.dx += 1
-    ##                debug("Go Faster")
-    ##            elif frame_count == 3200:
-    ##                scroller.dx += 1
-    ##            elif frame_count == 6400:
-    ##                scroller.dx += 1
-            #tell the levelManager we have a new frame
-            mainLevelManager.frame()
-            #get events registered
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    keepGoing = False
-                #this is here so we can quit
-                if event.type == pygame.KEYUP:
-                    if event.dict["key"] == K_ESCAPE:
-                        keepGoing = False
-                        debug("escape key")
-                    #toggle frame rate display w/ key f
-                    if event.dict["key"] == K_f:
-                        if displayFrame:
-                            displayFrame = False
-                        else:
-                            displayFrame = True
-                    if event.dict["key"] == K_p:
-                        pause = True
-                        keepGoing = False
-                    if event.dict["key"] == K_SPACE:
-                        rungroup.sprite.last_shot = 10
-                    else:
-                        pass
-            if rungroup.sprite: #if runner dies before our loop is over we don't
-                #want an error
-                pygame.sprite.groupcollide(gunnerGroup,blockGroup,True,True)
-                pygame.sprite.groupcollide(gunnerGroup,cubeGroup,True,True)
-                pygame.sprite.groupcollide(gunnerGroup,shieldGroup,True,True)
-                pygame.sprite.groupcollide(gunnerGroup,invGroup,True,True)
-                pygame.sprite.groupcollide(gunnerGroup,turretGroup,True,True)
-                pygame.sprite.groupcollide(gunnerGroup,gunGroup,True,True)
-                pygame.sprite.groupcollide(bulletGroup,blockGroup,False,True)
-                pygame.sprite.groupcollide(bulletGroup,cubeGroup,False,True)
-                pygame.sprite.groupcollide(bulletGroup,shieldGroup,False,True)
-                pygame.sprite.groupcollide(bulletGroup,invGroup,False,True)
-                pygame.sprite.groupcollide(bulletGroup,gunGroup,False,True)
-                collided = pygame.sprite.spritecollide(rungroup.sprite,bulletGroup,True)
-                for x in collided:
-                    rungroup.sprite.hit()
-                #delete blocks that intercept cubes
-                pygame.sprite.groupcollide(cubeGroup,blockGroup, False,True)
-                collidedSprites = pygame.sprite.spritecollide(rungroup.sprite,cubeGroup,True)
-                for x in collidedSprites:
-                    x.hit()
-                    score += x.score
-                pygame.sprite.groupcollide(invGroup,blockGroup,True,False)
-                pygame.sprite.groupcollide(invGroup,cubeGroup,False,True)
-                collidedSprites = pygame.sprite.spritecollide(rungroup.sprite,invGroup,True)
-                for x in collidedSprites:
-                    x.hit()
-                    rungroup.sprite.invinc()
-                    debug("Invincible")
-                pygame.sprite.groupcollide(shieldGroup,blockGroup,True,False)
-                pygame.sprite.groupcollide(shieldGroup,cubeGroup,False,True)
-                collidedSprites = pygame.sprite.spritecollide(rungroup.sprite,shieldGroup,True)
-                for x in collidedSprites:
-                    x.hit()
-                    if not rungroup.sprite.shield == 3:
-                        rungroup.sprite.shield +=1
-                    debug("Shield")
-                #check for colisions between runner and sprites in block group
-                collidedSprites = pygame.sprite.spritecollideany(rungroup.sprite, blockGroup)
-                if collidedSprites and _die:
-                    #reduce shields
-                    rungroup.sprite.hit()
-                pygame.sprite.groupcollide(gunGroup,blockGroup,False,True)
-                pygame.sprite.groupcollide(gunGroup,cubeGroup,False,True)
-                pygame.sprite.groupcollide(gunGroup,shieldGroup,False,True)
-                pygame.sprite.groupcollide(gunGroup,invGroup,False,True)
-                collided = pygame.sprite.spritecollide(rungroup.sprite,gunGroup,True)
-                for x in collided:
-                    rungroup.sprite.gun += 1
-            #increment distance
-            score += 0.5
-            #increment the number of frames
-            frame_count += 1
-            #choose distance font
-            scoreFont = pygame.font.Font(None, 40)
-            #get a surface with the font on it
-            fontSurface = scoreFont.render("{0:n}".format(round(score)), True,\
-                                              (255,255,255))
-            #rect for the new font
-            fontRect = pygame.rect.Rect(0,0,fontSurface.get_width()+5,\
-                                        fontSurface.get_height())
-            ##BEFORE DOING ANY NEW DRAWING, CLEAR ALL SPRITES
-            rungroup.update()
-            blockGroup.update()
-            cubeGroup.update()
-            effectsGroup.update()
-            gunnerGroup.update()
-            invGroup.update()
-            gunGroup.update()
-            turretGroup.update()
-            shieldGroup.update()
-            bulletGroup.update()
-            invGroup.clear(screen,background)
-            gunGroup.clear(screen,background)
-            gunnerGroup.clear(screen,background)
-            turretGroup.clear(screen,background)
-            bulletGroup.clear(screen,background)
-            shieldGroup.clear(screen,background)
-            rungroup.clear(screen, background)
-            blockGroup.clear(screen,background)
-            cubeGroup.clear(screen, background)
-            effectsGroup.clear(screen,background)
-            #clear the previous font
-            screen.blit(background,(0,0),fontRect)
-            #draw the new font
-            screen.blit(fontSurface,(0,0))
-            #optional framerate display
-            if displayFrame:
-                frameFont = pygame.font.Font(None, 40)
-                frameSurface = frameFont.render("{0:n}".format(round(\
-                                                    clock.get_fps())),\
-                                                   True, (255,255,255))
-                #find the rect for the new surface
 
-                x = 0
-                y = screen.get_height()-frameSurface.get_height()
-                frameRateRect = frameSurface.get_rect().move(x,y)
-                frameRateRect.width += 10
-                #clear previous font
-                screen.blit(background, (0, y),\
-                                         frameRateRect)
-                #draw new font
-                screen.blit(frameSurface, (0, y))
-            #set the shields to appropriate value (runner's shield)
-            if rungroup.sprite:
-                shieldsInd.setShield(rungroup.sprite.shield)
-            #add in shield indicator display
-            shieldIndicatorRect = fontRect
-            shieldIndicatorRect.top += (fontSurface.get_height() + 10)#put 10 px below font
-            speedIndicatorRect = shieldIndicatorRect.move(0,15)
-            invIndicatorRect = pygame.rect.Rect(0,0,105,15)
-            dispRect = pygame.display.get_surface().get_rect()
-            invIndicatorRect.centerx = dispRect.centerx
-            invIndicatorRect.centery = dispRect.centery
-            #draw all groups on screen                  
-            screen.blit(background, shieldIndicatorRect,shieldIndicatorRect)
-            screen.blit(background,speedIndicatorRect,speedIndicatorRect)
-            if rungroup.sprite:
-                if rungroup.sprite.inv:
-                    screen.blit(background,invIndicatorRect,invIndicatorRect)
-                    invInd.setPercentage((rungroup.sprite.invCount/float(800))*100)
-            #check to make sure the cubes arent spawned over the blocks
-            rungroup.draw(screen)
-            gunGroup.draw(screen)
-            gunnerGroup.draw(screen)
-            turretGroup.draw(screen)
-            bulletGroup.draw(screen)
-            blockGroup.draw(screen)
-            cubeGroup.draw(screen)
-            invGroup.draw(screen)
-            shieldGroup.draw(screen)
-            screen.blit(shieldsInd.getSurface(),shieldIndicatorRect) #blit new
-            screen.blit(speedInd.getSurface(),speedIndicatorRect)
-            if rungroup.sprite:
-                if rungroup.sprite.inv:
-                    screen.blit(invInd.getSurface(),invIndicatorRect)
-            effectsGroup.draw(screen)
-            pygame.display.update()
+def main():    
+    global screen
+    ##VARS DEFINED IN gameInit()
+    global mainLevelManager
+    global gunner
+    global background
+    global clock
+    global keepGoing
+    global runner1
+    global rungroup
+    global blockMinHeight
+    global blockMaxHeight
+    #GROUPS
+    global blockGroup
+    global cubeGroup
+    global invGroup
+    global shieldGroup
+    global turretGroup
+    global gunGroup
+    global effectsGroup
+    global bulletGroup
+    global gunnerGroup
+    global shieldsInd
+    global speedInd
+    global score
+    global frame_count
+    global displayFrame
+    global target_rate
+    global invInd
+    #run loop
+    while 1:
+        #check to make sure our runner still exists
+        if not rungroup.sprite:
+            break
+        #target_rate is the max possible frame rate
+        clock.tick(target_rate)
+        #check how long the user has beem playing and if they have\
+        #been playing long enough make the speed faster
+        ##LEVELING CODE[OLD]##
+##            if frame_count == 800: #Level 2
+##                scroller.dx += 1
+##                debug("lvl2")
+##            elif frame_count == 1200: #Level 3
+##                scroller.dx += 1
+##                debug("Go Faster")
+##            elif frame_count == 3200:
+##                scroller.dx += 1
+##            elif frame_count == 6400:
+##                scroller.dx += 1
+        #tell the levelManager we have a new frame
+        mainLevelManager.frame()
+        #get events registered
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                pause = False
+                quitGame()
+                return
+            #this is here so we can quit
+            if event.type == pygame.KEYUP:
+                if event.dict["key"] == K_ESCAPE:
+                    quitGame()
+                    return
+                    debug("escape key")
+                #toggle frame rate display w/ key f
+                if event.dict["key"] == K_f:
+                    if displayFrame:
+                        displayFrame = False
+                    else:
+                        displayFrame = True
+                if event.dict["key"] == K_p:
+                    pause()
+                    return
+                if event.dict["key"] == K_SPACE:
+                    rungroup.sprite.last_shot = 10
+                else:
+                    pass
+        if rungroup.sprite: #if runner dies before our loop is over we don't
+            #want an error
+            pygame.sprite.groupcollide(gunnerGroup,blockGroup,True,True)
+            pygame.sprite.groupcollide(gunnerGroup,cubeGroup,True,True)
+            pygame.sprite.groupcollide(gunnerGroup,shieldGroup,True,True)
+            pygame.sprite.groupcollide(gunnerGroup,invGroup,True,True)
+            pygame.sprite.groupcollide(gunnerGroup,turretGroup,True,True)
+            pygame.sprite.groupcollide(gunnerGroup,gunGroup,True,True)
+            pygame.sprite.groupcollide(bulletGroup,blockGroup,False,True)
+            pygame.sprite.groupcollide(bulletGroup,cubeGroup,False,True)
+            pygame.sprite.groupcollide(bulletGroup,shieldGroup,False,True)
+            pygame.sprite.groupcollide(bulletGroup,invGroup,False,True)
+            pygame.sprite.groupcollide(bulletGroup,gunGroup,False,True)
+            collided = pygame.sprite.spritecollide(rungroup.sprite,bulletGroup,True)
+            for x in collided:
+                rungroup.sprite.hit()
+            #delete blocks that intercept cubes
+            pygame.sprite.groupcollide(cubeGroup,blockGroup, False,True)
+            collidedSprites = pygame.sprite.spritecollide(rungroup.sprite,cubeGroup,True)
+            for x in collidedSprites:
+                x.hit()
+                score += x.score
+            pygame.sprite.groupcollide(invGroup,blockGroup,True,False)
+            pygame.sprite.groupcollide(invGroup,cubeGroup,False,True)
+            collidedSprites = pygame.sprite.spritecollide(rungroup.sprite,invGroup,True)
+            for x in collidedSprites:
+                x.hit()
+                rungroup.sprite.invinc()
+                debug("Invincible")
+            pygame.sprite.groupcollide(shieldGroup,blockGroup,True,False)
+            pygame.sprite.groupcollide(shieldGroup,cubeGroup,False,True)
+            collidedSprites = pygame.sprite.spritecollide(rungroup.sprite,shieldGroup,True)
+            for x in collidedSprites:
+                x.hit()
+                if not rungroup.sprite.shield == 3:
+                    rungroup.sprite.shield +=1
+                debug("Shield")
+            #check for colisions between runner and sprites in block group
+            collidedSprites = pygame.sprite.spritecollideany(rungroup.sprite, blockGroup)
+            if collidedSprites and _die:
+                #reduce shields
+                rungroup.sprite.hit()
+            pygame.sprite.groupcollide(gunGroup,blockGroup,False,True)
+            pygame.sprite.groupcollide(gunGroup,cubeGroup,False,True)
+            pygame.sprite.groupcollide(gunGroup,shieldGroup,False,True)
+            pygame.sprite.groupcollide(gunGroup,invGroup,False,True)
+            collided = pygame.sprite.spritecollide(rungroup.sprite,gunGroup,True)
+            for x in collided:
+                rungroup.sprite.gun = True
+        #increment distance
+        score += 0.5
+        #increment the number of frames
+        frame_count += 1
+        #choose distance font
+        scoreFont = pygame.font.Font(None, 40)
+        #get a surface with the font on it
+        fontSurface = scoreFont.render("{0:n}".format(round(score)), True,\
+                                          (255,255,255))
+        #rect for the new font
+        fontRect = pygame.rect.Rect(0,0,fontSurface.get_width()+5,\
+                                    fontSurface.get_height())
+        ##BEFORE DOING ANY NEW DRAWING, CLEAR ALL SPRITES
+        rungroup.update()
+        blockGroup.update()
+        cubeGroup.update()
+        effectsGroup.update()
+        gunnerGroup.update()
+        invGroup.update()
+        gunGroup.update()
+        turretGroup.update()
+        shieldGroup.update()
+        bulletGroup.update()
+        invGroup.clear(screen,background)
+        gunGroup.clear(screen,background)
+        gunnerGroup.clear(screen,background)
+        turretGroup.clear(screen,background)
+        bulletGroup.clear(screen,background)
+        shieldGroup.clear(screen,background)
+        rungroup.clear(screen, background)
+        blockGroup.clear(screen,background)
+        cubeGroup.clear(screen, background)
+        effectsGroup.clear(screen,background)
+        #clear the previous font
+        screen.blit(background,(0,0),fontRect)
+        #draw the new font
+        screen.blit(fontSurface,(0,0))
+        #optional framerate display
+        if displayFrame:
+            frameFont = pygame.font.Font(None, 40)
+            frameSurface = frameFont.render("{0:n}".format(round(\
+                                                clock.get_fps())),\
+                                               True, (255,255,255))
+            #find the rect for the new surface
+            x = 0
+            y = screen.get_height()-frameSurface.get_height()
+            frameRateRect = frameSurface.get_rect().move(x,y)
+            frameRateRect.width += 10
+            #clear previous font
+            screen.blit(background, (0, y),\
+                                     frameRateRect)
+            #draw new font
+            screen.blit(frameSurface, (0, y))
+        #set the shields to appropriate value (runner's shield)
+        if rungroup.sprite:
+            shieldsInd.setShield(rungroup.sprite.shield)
+        #add in shield indicator display
+        shieldIndicatorRect = fontRect
+        shieldIndicatorRect.top += (fontSurface.get_height() + 10)#put 10 px below font
+        speedIndicatorRect = shieldIndicatorRect.move(0,15)
+        invIndicatorRect = pygame.rect.Rect(0,0,105,15)
+        dispRect = pygame.display.get_surface().get_rect()
+        invIndicatorRect.centerx = dispRect.centerx
+        invIndicatorRect.centery = dispRect.centery
+        #draw all groups on screen                  
+        screen.blit(background, shieldIndicatorRect,shieldIndicatorRect)
+        screen.blit(background,speedIndicatorRect,speedIndicatorRect)
+        if rungroup.sprite:
+            if rungroup.sprite.inv:
+                screen.blit(background,invIndicatorRect,invIndicatorRect)
+                invInd.setPercentage((rungroup.sprite.invCount/float(800))*100)
+        #check to make sure the cubes arent spawned over the blocks
+        rungroup.draw(screen)
+        gunGroup.draw(screen)
+        gunnerGroup.draw(screen)
+        turretGroup.draw(screen)
+        bulletGroup.draw(screen)
+        blockGroup.draw(screen)
+        cubeGroup.draw(screen)
+        invGroup.draw(screen)
+        shieldGroup.draw(screen)
+        screen.blit(shieldsInd.getSurface(),shieldIndicatorRect) #blit new
+        screen.blit(speedInd.getSurface(),speedIndicatorRect)
+        if rungroup.sprite:
+            if rungroup.sprite.inv:
+                screen.blit(invInd.getSurface(),invIndicatorRect)
+        effectsGroup.draw(screen)
+        pygame.display.update()
+    #end the game
+    endMenu()
+
+def pause():
+    while 1:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                quitGame()
+                return
                 #this is here so we can quit
             if event.type == pygame.KEYUP:
                 debug("keyup event")
                 if event.dict["key"] == K_ESCAPE:
-                    pause = False
+                    quitGame()
+                    return
                 if event.dict["key"] == K_p:
-                    pause = False
-                    keepGoing = True
+                    main()
+                    return
         pygame.display.update()
-    #end the game
+        
+def endMenu():
+    global selected
+    global menu
+    global clock
+    global screen
+    menu = cMenu(0, 0, 20, 5, 'horizontal', 5, screen,
+               [('Play Again', 1, None),
+                ('Quit',       2, None)])
+
+    # Center the menu on the draw_surface (the entire screen here)
+    menu.set_center(True, True)
+    # Center the menu on the draw_surface (the entire screen here)
+    menu.set_alignment('center', 'center')
+    # Create the state variables (make them different so that the user event is
+    # triggered at the start of the "while 1" loop so that the initial display
+    # does not wait for user input)
+    state = 0
+    prev_state = 1
+    # rect_list is the list of pygame.Rect's that will tell pygame where to
+    # update the screen (there is no point in updating the entire screen if only
+    # a small portion of it changed!)
+    rect_list = []
+    font = pygame.font.Font(None, 30)
+    fontSurface = font.render("Your score is: {0:n}".format(round(score)),True,(255,255,255))
+    # The main while loop
+    while 1:
+      # Check if the state has changed, if it has, then post a user event to
+      # the queue to force the menu to be shown at least once
+      if prev_state != state:
+         pygame.event.post(pygame.event.Event(EVENT_CHANGE_STATE, key = 0))
+         prev_state = state
+      # Get the next event
+      e = pygame.event.wait()
+      # Update the menu, based on which "state" we are in - When using the menu
+      # in a more complex program, definitely make the states global variables
+      # so that you can refer to them by a name
+      if e.type == pygame.KEYDOWN or e.type == EVENT_CHANGE_STATE:
+         if state == 0:
+            rect_list, state = menu.update(e, state)
+            rect_list.append(screen.blit(fontSurface,(screen.get_rect().centerx-(fontSurface.get_width()/2.), \
+                             (screen.get_rect().centery)-50,0,0)))
+         elif state == 1:
+            debug("start game")
+            state = 0
+            gameInit()
+            main()
+            return
+         else:
+            debug("exit")
+            quitGame()
+            return
+
+      # Quit if the user presses the exit button
+      if e.type == pygame.QUIT:
+         quitGame()
+         return
+
+      # Update the screen
+      pygame.display.update(rect_list)
+
+def quitGame():
     pygame.display.quit()
     print "Your score is :", round(score)
 
 if __name__ == "__main__":
+    init()
+    gameInit()
     main()
