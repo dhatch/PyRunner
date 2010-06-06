@@ -65,6 +65,7 @@ gunGroup = None
 effectsGroup = None
 bulletGroup = None
 gunnerGroup = None
+ammoInd = None
 shieldsInd = None
 speedInd = None
 score = None
@@ -96,6 +97,7 @@ class runner(pygame.sprite.Sprite):
         self.last_shot = 10
         self.shots = 0
         self.invCount = 800
+        self.ammo = 0
     def hit(self):
         if not self.inv:
             if not self.flash: #if not already flasshing from a collision
@@ -121,11 +123,13 @@ class runner(pygame.sprite.Sprite):
                 debug("reload")
                 self.shots = 0
                 self.gun = 1
+                self.ammo = 10
             elif self.gun == 1:
                 debug(self.gun)
                 if self.shots > 9:
                     self.shots = 0
                     self.gun = 0
+                    self.ammo = 0
                 else:
                     self.last_shot +=1
                     if self.last_shot >= 10:
@@ -133,6 +137,7 @@ class runner(pygame.sprite.Sprite):
                         gunnerGroup.add(gun(self.rect.centery,self.rect.centerx))
                         self.last_shot = 0
                         debug("gunnerGroup" + str(gunnerGroup))
+                        self.ammo -= 1
         #clip to our max and min heights created when we make borders
         if self.rect.top < max_height+1:
             self.rect.top = max_height+1
@@ -337,14 +342,36 @@ class gun(scroller):
     def update(self):
         scroller.update(self)
         self.rect.centerx += self._dx
-        if self.shots == 0:
-            debug(int(rungroup.sprite.gun))
-            runner.gun = 0
-        self.shots -= 1
         if self.rect.centerx > pygame.display.get_surface().get_width():
             self.kill()
             del self
-        
+class ammoIndicator():
+    def __init__(self):
+        self.ammoNumber = 0 #define storage of shields
+        self.cubeTemplate = pygame.image.load(os.path.join("Resources",\
+                                                           "blue square.bmp"))
+        self.cubeTemplate = self.cubeTemplate.convert()
+        self.surface = None #location to store our surface
+        self.displayedAmmo = 0#number of shields displayed
+        self.font = pygame.font.Font(None,18)
+        self.fontSurface = self.font.render("Ammo: ",True,(255,255,255))
+    def getSurface(self): #prepare and output a surface with the shields
+        if self.surface and self.displayedAmmo == self.ammoNumber:
+            return self.surface #if we don't need to make a surface return the
+        #old one
+        elif not self.surface: #make a surface if we need one
+            self.surface = pygame.Surface(((400+self.fontSurface.get_width()),10))
+            self.surface.fill((0,0,0)) #fill with the bg color
+        self.surface.fill((0,0,0))
+        count = self.fontSurface.get_width() + 5
+        self.surface.blit(self.fontSurface,(0,0))
+        for x in range(self.ammoNumber): #build surface
+            self.surface.blit(self.cubeTemplate,(count,0))
+            count += 35
+        self.displayedAmmo = self.ammoNumber #we are displaying the number
+        return self.surface
+    def setAmmo(self,ammo):
+        self.ammoNumber = ammo        
 #class to layout and return a surface containing the shields indicator
 class shieldIndicator():
     def __init__(self):
@@ -599,6 +626,7 @@ def gameInit():
     global effectsGroup
     global bulletGroup
     global gunnerGroup
+    global ammoInd
     global shieldsInd
     global speedInd
     global score
@@ -659,7 +687,7 @@ def gameInit():
     ##LEVEL CREATION AND DESIGN
     mainLevelManager.add(level({blockGroup:[2,100,200,75,True],cubeGroup:[1,700,2000,300,True],\
                                 invGroup:[1,2000,5000,300,False],shieldGroup:[1,1000,3000,300,False],turretGroup:[1,1000,2000,300,False]\
-                                ,gunGroup:[1,1000,2000,300,False]},6,800))
+                                },6,800))
     mainLevelManager.add(level({},7,800))
     mainLevelManager.add(level({blockGroup:[3,100,200,75,True]},7,1200))
     mainLevelManager.add(level({shieldGroup:[1,4000,7000,300,True]},8,800))
@@ -670,6 +698,8 @@ def gameInit():
     mainLevelManager.add(level({blockGroup:[3,100,200,75,False],shieldGroup:[1,450,600,300,True]},8,1000))
     mainLevelManager.add(level({blockGroup:[3,75,200,75,True],shieldGroup:[1,4000,7000,300,True]},9,3200))
     #create a shield indicator
+    ammoInd = ammoIndicator()
+    ammoInd.setAmmo(10)
     shieldsInd = shieldIndicator()
     shieldsInd.setShield(3)
     speedInd = progressIndicator((0,255,0),"Speed:   ")
@@ -712,6 +742,7 @@ def main():
     global effectsGroup
     global bulletGroup
     global gunnerGroup
+    global ammoInd
     global shieldsInd
     global speedInd
     global score
@@ -813,7 +844,8 @@ def main():
             pygame.sprite.groupcollide(gunGroup,invGroup,False,True)
             collided = pygame.sprite.spritecollide(rungroup.sprite,gunGroup,True)
             for x in collided:
-                rungroup.sprite.gun = True
+                rungroup.sprite.gun += 1
+                rungroup.sprite.ammo = 10
         #increment distance
         score += 0.5
         #increment the number of frames
@@ -870,15 +902,21 @@ def main():
         #set the shields to appropriate value (runner's shield)
         if rungroup.sprite:
             shieldsInd.setShield(rungroup.sprite.shield)
+        if rungroup.sprite:
+            ammoInd.setAmmo(rungroup.sprite.ammo)
         #add in shield indicator display
+        ammoIndicatorRect = fontRect
+        ammoIndicatorRect.top += (fontSurface.get_height() + 15)#put 10 px below font
+        ammoIndicatorRect = ammoIndicatorRect.move(200,7)
         shieldIndicatorRect = fontRect
-        shieldIndicatorRect.top += (fontSurface.get_height() + 10)#put 10 px below font
-        speedIndicatorRect = shieldIndicatorRect.move(0,15)
+        shieldIndicatorRect.top += (fontSurface.get_height() - 40)#put 10 px below font
+        speedIndicatorRect = shieldIndicatorRect.move(0,20)
         invIndicatorRect = pygame.rect.Rect(0,0,105,15)
         dispRect = pygame.display.get_surface().get_rect()
         invIndicatorRect.centerx = dispRect.centerx
         invIndicatorRect.centery = dispRect.centery
-        #draw all groups on screen                  
+        #draw all groups on screen
+        screen.blit(background,ammoIndicatorRect, ammoIndicatorRect)
         screen.blit(background, shieldIndicatorRect,shieldIndicatorRect)
         screen.blit(background,speedIndicatorRect,speedIndicatorRect)
         if rungroup.sprite:
@@ -895,6 +933,7 @@ def main():
         cubeGroup.draw(screen)
         invGroup.draw(screen)
         shieldGroup.draw(screen)
+        screen.blit(ammoInd.getSurface(),ammoIndicatorRect)
         screen.blit(shieldsInd.getSurface(),shieldIndicatorRect) #blit new
         screen.blit(speedInd.getSurface(),speedIndicatorRect)
         if rungroup.sprite:
