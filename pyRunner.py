@@ -687,7 +687,7 @@ def gameInit():
     ##LEVEL CREATION AND DESIGN
     mainLevelManager.add(level({blockGroup:[2,100,200,75,True],cubeGroup:[1,700,2000,300,True],\
                                 invGroup:[1,2000,5000,300,False],shieldGroup:[1,1000,3000,300,False],turretGroup:[1,1000,2000,300,False]\
-                                },6,800))
+                                ,gunGroup:[1,50,50,50,False]},6,800))
     mainLevelManager.add(level({},7,800))
     mainLevelManager.add(level({blockGroup:[3,100,200,75,True]},7,1200))
     mainLevelManager.add(level({shieldGroup:[1,4000,7000,300,True]},8,800))
