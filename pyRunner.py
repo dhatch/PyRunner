@@ -36,6 +36,9 @@ pygame.init()
 ##CHANGELOG 0.9:
 #David:
 #-inserted modified and improved levling code
+#-created endMenu
+#Brian:
+#-fixed error in gun programming, now reloads
 
 ##VARS
 ##VARS DEFINED IN init()
