@@ -548,7 +548,7 @@ class level(object):
 
             
 #debug function
-_debug = True
+_debug = False
 _die = True
 def debug(printstring):
     if _debug:
@@ -915,7 +915,7 @@ def endMenu():
     global menu
     global clock
     global screen
-    menu = cMenu(50, 50, 20, 5, 'horizontal', 5, screen,
+    menu = cMenu(0, 0, 20, 5, 'horizontal', 5, screen,
                [('Play Again', 1, None),
                 ('Quit',       2, None)])
 
@@ -949,8 +949,8 @@ def endMenu():
       if e.type == pygame.KEYDOWN or e.type == EVENT_CHANGE_STATE:
          if state == 0:
             rect_list, state = menu.update(e, state)
-            rect_list.append(screen.blit(fontSurface,(screen.get_rect().centerx-(menu.contained_rect.width/2.), \
-                             (screen.get_rect().centery/2.)-50,0,0)))
+            rect_list.append(screen.blit(fontSurface,(screen.get_rect().centerx-(fontSurface.get_width()/2.), \
+                             (screen.get_rect().centery)-50,0,0)))
          elif state == 1:
             debug("start game")
             state = 0
