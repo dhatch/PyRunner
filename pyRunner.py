@@ -349,7 +349,7 @@ class ammoIndicator():
     def __init__(self):
         self.ammoNumber = 0 #define storage of shields
         self.cubeTemplate = pygame.image.load(os.path.join("Resources",\
-                                                           "blue square.bmp"))
+                                                           "bulletInd.gif"))
         self.cubeTemplate = self.cubeTemplate.convert()
         self.surface = None #location to store our surface
         self.displayedAmmo = 0#number of shields displayed
@@ -360,14 +360,14 @@ class ammoIndicator():
             return self.surface #if we don't need to make a surface return the
         #old one
         elif not self.surface: #make a surface if we need one
-            self.surface = pygame.Surface(((400+self.fontSurface.get_width()),10))
+            self.surface = pygame.Surface(((155+self.fontSurface.get_width()),10))
             self.surface.fill((0,0,0)) #fill with the bg color
         self.surface.fill((0,0,0))
         count = self.fontSurface.get_width() + 5
         self.surface.blit(self.fontSurface,(0,0))
         for x in range(self.ammoNumber): #build surface
             self.surface.blit(self.cubeTemplate,(count,0))
-            count += 35
+            count += 15
         self.displayedAmmo = self.ammoNumber #we are displaying the number
         return self.surface
     def setAmmo(self,ammo):
