@@ -1154,7 +1154,7 @@ def mainMenu():
             rect_list.append(screen.get_rect())
             menu = cMenu(0, 0, 20, 10, 'vertical', 5, screen,
                         [('Play Game', 1, None),
-                         ('High Scores',2,None),
+                         #('High Scores',2,None),
                          ('About',3,None),
                          ('Quit', 4, None)])
             # Center the menu on the draw_surface (the entire screen here)
