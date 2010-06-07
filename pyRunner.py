@@ -960,7 +960,7 @@ def pause():
     global menu
     global clock
     global screen
-    menu = cMenu(0, 0, 0, 10, 'vertical', 5, screen,
+    menu = cMenu(0, 0, 10, 10, 'horizontal', 5, screen,
             [('Continue', 1, None),
             ('Quit',       2, None)])
 
@@ -1014,7 +1014,7 @@ def endMenu():
     global menu
     global clock
     global screen
-    menu = cMenu(0, 0, 0, 10, 'vertical', 5, screen,
+    menu = cMenu(0, 0, 10, 10, 'horizontal', 5, screen,
                [('Play Again', 1, None),
                 ('Quit',       2, None)])
 
@@ -1113,11 +1113,22 @@ def mainMenu():
             screen.fill((0,0,0))
             rect_list.append(screen.get_rect())
             menu = cMenu(0,0,20,10,'vertical',5,screen,
-            [('Challenge',5,None),
-            ('Endurance',6,None),
+            [('Endurance',6,None),
+            ('Challenge',5,None),
             ('Back',7,None)])
             menu.set_center(True, True)
             menu.set_alignment('center', 'center')
+            state = 0
+            prev_state = 1
+        elif state == 3:
+            screen.fill((0,0,0))
+            rect_list.append(screen.get_rect())
+            menu = cMenu(0,0,20,10,'vertical',5,screen,[('Code by Brian Erying and David Hatch',7,None),\
+                                                        ('Images by Dan Austin',7,None),\
+                                                        ('Press enter to return',7,None)])
+            menu.set_center(True, True)
+            menu.set_alignment('center', 'center')
+            menu.set_selected_color((255,255,255))
             state = 0
             prev_state = 1
         elif state == 4:
