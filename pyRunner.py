@@ -707,8 +707,8 @@ def gameInit():
         mainLevelManager.add(level({blockGroup:[3,75,200,75,True],shieldGroup:[1,4000,7000,300,True]},9,3200))
     elif gameMode == "challenge":
         mainLevelManager.add(level({blockGroup:[3,75,200,75,True],cubeGroup:[1,700,2000,300,True],\
-                                    invGroup:[1,5000,10000,300,True],shieldGroup:[1,4000,7000,300,True],turretGroup:[1,2000,4000,300,True]\
-                                    ,gunGroup:[1,3000,7000,300,True]},9,800))
+                                    invGroup:[1,10000,20000,300,True],shieldGroup:[1,8000,15000,300,True],turretGroup:[1,2000,4000,300,True]\
+                                    ,gunGroup:[1,6500,14000,300,True]},9,800))
     #create a shield indicator
     ammoInd = ammoIndicator()
     ammoInd.setAmmo(10)
