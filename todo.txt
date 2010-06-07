@@ -1,11 +1,6 @@
--Readme
--Level Design Enhancements
+-Level Design Enhancements (powerups appear too often)
 -Sound
--Gun Ammo indicator
--Fix turret system
--Try to do incremental movement speed
--Check turret off screen tests
 -frame rate does not disapear 
--some levels are too long
 -invcinibility doesn't disapear
--ammo bar
+-high scores
+-pause menu
