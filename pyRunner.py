@@ -73,6 +73,7 @@ frame_count = None
 displayFrame = None
 target_rate = None
 invInd = None
+gameMode = None
 
 class runner(pygame.sprite.Sprite):
     def __init__(self, screen):
@@ -538,7 +539,10 @@ class levelManager(object):
         self.framesTillNext = self.activeLevel.length
         debug("scroller.dx:"+str(scroller.dx))
         if self.speedInd:
-            self.speedInd.setPercentage(((self.activeLevel.speed-self.minSpeed)/float(self.maxSpeed-self.minSpeed))*100)
+            if len(self.levelList) == 1:
+                self.speedInd.setPercentage(100)
+            else:
+                self.speedInd.setPercentage(((self.activeLevel.speed-self.minSpeed)/float(self.maxSpeed-self.minSpeed))*100)
     def frame(self):#called every frame
         self.frameCount += 1
         self.framesTillNext -= 1
@@ -587,7 +591,7 @@ class level(object):
 
             
 #debug function
-_debug = True
+_debug = False
 _die = True
 def debug(printstring):
     if _debug:
@@ -596,12 +600,14 @@ def debug(printstring):
 def init():
     #create screen
     global screen
+    global clock
     if(_debug):
         screen = pygame.display.set_mode((600, 820))
     else:
         screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
     # Ignore mouse motion (greatly reduces resources when not needed)
     pygame.event.set_blocked(pygame.MOUSEMOTION)
+    clock = pygame.time.Clock()
 def gameInit():
     global screen
     ##VARS DEFINED IN gameInit()
@@ -634,6 +640,8 @@ def gameInit():
     global displayFrame
     global target_rate
     global invInd
+    #Globals defined in mainMenu()
+    global gameMode
     ##INITIALIZATION CODE    
     mainLevelManager = levelManager()
     gunner = pygame.image.load(os.path.join(\
@@ -644,7 +652,6 @@ def gameInit():
     pygame.draw.rect(background, (0,0,0), background.get_rect())
     #only nessecary if not fullscreen
     pygame.display.set_caption("pyRunner 2D")
-    clock = pygame.time.Clock()
     keepGoing = True
     #create our runner and a group to hold it
     runner1 = runner(screen)
@@ -685,18 +692,23 @@ def gameInit():
     bulletGroup = pygame.sprite.RenderUpdates()
     gunnerGroup = pygame.sprite.RenderUpdates()
     ##LEVEL CREATION AND DESIGN
-    mainLevelManager.add(level({blockGroup:[2,100,200,75,True],cubeGroup:[1,700,2000,300,True],\
-                                invGroup:[1,2000,5000,300,False],shieldGroup:[1,1000,3000,300,False],turretGroup:[1,1000,2000,300,False]\
-                                ,gunGroup:[1,50,50,50,False]},6,800))
-    mainLevelManager.add(level({},7,800))
-    mainLevelManager.add(level({blockGroup:[3,100,200,75,True]},7,1200))
-    mainLevelManager.add(level({shieldGroup:[1,4000,7000,300,True]},8,800))
-    mainLevelManager.add(level({gunGroup:[1,3000,7000,300,True]},8,600))
-    mainLevelManager.add(level({invGroup:[1,5000,10000,300,True]},8,1200))
-    mainLevelManager.add(level({turretGroup:[1,3000,5000,300,True]},8,3500))
-    mainLevelManager.add(level({turretGroup:[1,2000,4000,300,True]},8,2000))
-    mainLevelManager.add(level({blockGroup:[3,100,200,75,False],shieldGroup:[1,450,600,300,True]},8,1000))
-    mainLevelManager.add(level({blockGroup:[3,75,200,75,True],shieldGroup:[1,4000,7000,300,True]},9,3200))
+    if gameMode == "endurance":
+        mainLevelManager.add(level({blockGroup:[2,100,200,75,True],cubeGroup:[1,700,2000,300,True],\
+                                    invGroup:[1,2000,5000,300,False],shieldGroup:[1,1000,3000,300,False],turretGroup:[1,1000,2000,300,False]\
+                                    ,gunGroup:[1,50,50,50,False]},6,800))
+        mainLevelManager.add(level({},7,800))
+        mainLevelManager.add(level({blockGroup:[3,100,200,75,True]},7,1200))
+        mainLevelManager.add(level({shieldGroup:[1,4000,7000,300,True]},8,800))
+        mainLevelManager.add(level({gunGroup:[1,3000,7000,300,True]},8,600))
+        mainLevelManager.add(level({invGroup:[1,5000,10000,300,True]},8,1200))
+        mainLevelManager.add(level({turretGroup:[1,3000,5000,300,True]},8,3500))
+        mainLevelManager.add(level({turretGroup:[1,2000,4000,300,True]},8,2000))
+        mainLevelManager.add(level({blockGroup:[3,100,200,75,False],shieldGroup:[1,450,600,300,True]},8,1000))
+        mainLevelManager.add(level({blockGroup:[3,75,200,75,True],shieldGroup:[1,4000,7000,300,True]},9,3200))
+    elif gameMode == "challenge":
+        mainLevelManager.add(level({blockGroup:[3,75,200,75,True],cubeGroup:[1,700,2000,300,True],\
+                                    invGroup:[1,5000,10000,300,True],shieldGroup:[1,4000,7000,300,True],turretGroup:[1,2000,4000,300,True]\
+                                    ,gunGroup:[1,3000,7000,300,True]},9,800))
     #create a shield indicator
     ammoInd = ammoIndicator()
     ammoInd.setAmmo(10)
@@ -780,9 +792,8 @@ def main():
             #this is here so we can quit
             if event.type == pygame.KEYUP:
                 if event.dict["key"] == K_ESCAPE:
-                    quitGame()
+                    pause()
                     return
-                    debug("escape key")
                 #toggle frame rate display w/ key f
                 if event.dict["key"] == K_f:
                     if displayFrame:
@@ -945,30 +956,67 @@ def main():
     endMenu()
 
 def pause():
+    global selected
+    global menu
+    global clock
+    global screen
+    menu = cMenu(0, 0, 10, 10, 'horizontal', 5, screen,
+            [('Continue', 1, None),
+            ('Exit',       2, None)])
+
+    # Center the menu on the draw_surface (the entire screen here)
+    menu.set_center(True, True)
+    # Center the menu on the draw_surface (the entire screen here)
+    menu.set_alignment('center', 'center')
+    # Create the state variables (make them different so that the user event is
+    # triggered at the start of the "while 1" loop so that the initial display
+    # does not wait for user input)
+    state = 0
+    prev_state = 1
+    # rect_list is the list of pygame.Rect's that will tell pygame where to
+    # update the screen (there is no point in updating the entire screen if only
+    # a small portion of it changed!)
+    rect_list = []
+    # The main while loop
     while 1:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                quitGame()
+        # Check if the state has changed, if it has, then post a user event to
+        # the queue to force the menu to be shown at least once
+        if prev_state != state:
+            pygame.event.post(pygame.event.Event(EVENT_CHANGE_STATE, key = 0))
+            prev_state = state
+        # Get the next event
+        e = pygame.event.wait()
+        # Update the menu, based on which "state" we are in - When using the menu
+        # in a more complex program, definitely make the states global variables
+        # so that you can refer to them by a name
+        if e.type == pygame.KEYDOWN or e.type == EVENT_CHANGE_STATE:
+            if state == 0:
+                rect_list, state = menu.update(e, state)
+            elif state == 1:
+                screen.blit(background,menu.contained_rect,menu.contained_rect)
+                main()
                 return
-                #this is here so we can quit
-            if event.type == pygame.KEYUP:
-                debug("keyup event")
-                if event.dict["key"] == K_ESCAPE:
-                    quitGame()
-                    return
-                if event.dict["key"] == K_p:
-                    main()
-                    return
-        pygame.display.update()
+            else:
+                debug("exit")
+                mainMenu()
+                return
+        # Quit if the user presses the exit button
+        if e.type == pygame.QUIT:
+            quitGame()
+            return
+
+        # Update the screen
+        pygame.display.update(rect_list)
+    
         
 def endMenu():
     global selected
     global menu
     global clock
     global screen
-    menu = cMenu(0, 0, 20, 5, 'horizontal', 5, screen,
+    menu = cMenu(0, 0, 10, 10, 'horizontal', 5, screen,
                [('Play Again', 1, None),
-                ('Quit',       2, None)])
+                ('Exit',2, None)])
 
     # Center the menu on the draw_surface (the entire screen here)
     menu.set_center(True, True)
@@ -1001,7 +1049,7 @@ def endMenu():
          if state == 0:
             rect_list, state = menu.update(e, state)
             rect_list.append(screen.blit(fontSurface,(screen.get_rect().centerx-(fontSurface.get_width()/2.), \
-                             (screen.get_rect().centery)-50,0,0)))
+                             (screen.get_rect().centery)-60,0,0)))
          elif state == 1:
             debug("start game")
             state = 0
@@ -1010,7 +1058,7 @@ def endMenu():
             return
          else:
             debug("exit")
-            quitGame()
+            mainMenu()
             return
 
       # Quit if the user presses the exit button
@@ -1021,11 +1069,112 @@ def endMenu():
       # Update the screen
       pygame.display.update(rect_list)
 
+def mainMenu():
+    global selected
+    global menu
+    global clock
+    global screen
+    global gameMode
+    screen.fill((0,0,0))
+    pygame.display.update()
+    menu = cMenu(0, 0, 0, 10, 'vertical', 5, screen,
+               [('Play Game', 1, None),
+                #('High Scores',2,None),
+                ('About',3,None),
+                ('Quit',       4, None)])
+
+    # Center the menu on the draw_surface (the entire screen here)
+    menu.set_center(True, True)
+    # Center the menu on the draw_surface (the entire screen here)
+    menu.set_alignment('center', 'center')
+    # Create the state variables (make them different so that the user event is
+    # triggered at the start of the "while 1" loop so that the initial display
+    # does not wait for user input)
+    state = 0
+    prev_state = 1
+    # rect_list is the list of pygame.Rect's that will tell pygame where to
+    # update the screen (there is no point in updating the entire screen if only
+    # a small portion of it changed!)
+    rect_list = []
+    title = pygame.image.load(os.path.join("Resources","pyRunnerTitle.gif"))
+    title = title.convert()
+    # The main while loop
+    while 1:
+      # Check if the state has changed, if it has, then post a user event to
+      # the queue to force the menu to be shown at least once
+      if prev_state != state:
+         pygame.event.post(pygame.event.Event(EVENT_CHANGE_STATE, key = 0))
+         prev_state = state
+      # Get the next event
+      e = pygame.event.wait()
+      # Update the menu, based on which "state" we are in - When using the menu
+      # in a more complex program, definitely make the states global variables
+      # so that you can refer to them by a name
+      if e.type == pygame.KEYDOWN or e.type == EVENT_CHANGE_STATE:
+        if state == 0:
+            rect_list, state = menu.update(e, state)
+        elif state == 1:
+            screen.fill((0,0,0))
+            rect_list.append(screen.get_rect())
+            menu = cMenu(0,0,20,10,'vertical',5,screen,
+            [('Endurance',6,None),
+            ('Challenge',5,None),
+            ('Back',7,None)])
+            menu.set_center(True, True)
+            menu.set_alignment('center', 'center')
+            state = 0
+            prev_state = 1
+        elif state == 3:
+            screen.fill((0,0,0))
+            rect_list.append(screen.get_rect())
+            menu = cMenu(0,0,20,10,'vertical',5,screen,[('Code by Brian Erying and David Hatch',7,None),\
+                                                        ('Images by Dan Austin',7,None),\
+                                                        ('Press enter to return',7,None)])
+            menu.set_center(True, True)
+            menu.set_alignment('center', 'center')
+            menu.set_selected_color((255,255,255))
+            state = 0
+            prev_state = 1
+        elif state == 4:
+            debug("exit")
+            quitGame()
+            return
+        elif state == 5:
+            gameMode = 'challenge'
+            gameInit()
+            main()
+            return
+        elif state == 6:
+            gameMode = 'endurance'
+            gameInit()
+            main()
+            return
+        elif state == 7:
+            screen.fill((0,0,0))
+            rect_list.append(screen.get_rect())
+            menu = cMenu(0, 0, 20, 10, 'vertical', 5, screen,
+                        [('Play Game', 1, None),
+                         ('High Scores',2,None),
+                         ('About',3,None),
+                         ('Quit', 4, None)])
+            # Center the menu on the draw_surface (the entire screen here)
+            menu.set_center(True, True)
+            # Center the menu on the draw_surface (the entire screen here)
+            menu.set_alignment('center', 'center')
+            state = 0
+            prev_state = 1
+      # Quit if the user presses the exit button
+      if e.type == pygame.QUIT:
+         quitGame()
+         return
+      rect_list.append(screen.blit(title,(screen.get_rect().centerx-250,0)))  
+
+      # Update the screen
+      pygame.display.update(rect_list)
+      
 def quitGame():
     pygame.display.quit()
-    print "Your score is :", round(score)
 
 if __name__ == "__main__":
     init()
-    gameInit()
-    main()
+    mainMenu()
