@@ -591,7 +591,7 @@ class level(object):
 
             
 #debug function
-_debug = True
+_debug = False
 _die = True
 def debug(printstring):
     if _debug:
@@ -962,7 +962,7 @@ def pause():
     global screen
     menu = cMenu(0, 0, 10, 10, 'horizontal', 5, screen,
             [('Continue', 1, None),
-            ('Quit',       2, None)])
+            ('Exit',       2, None)])
 
     # Center the menu on the draw_surface (the entire screen here)
     menu.set_center(True, True)
@@ -998,7 +998,7 @@ def pause():
                 return
             else:
                 debug("exit")
-                quitGame()
+                mainMenu()
                 return
         # Quit if the user presses the exit button
         if e.type == pygame.QUIT:
@@ -1016,7 +1016,7 @@ def endMenu():
     global screen
     menu = cMenu(0, 0, 10, 10, 'horizontal', 5, screen,
                [('Play Again', 1, None),
-                ('Quit',       2, None)])
+                ('Exit',2, None)])
 
     # Center the menu on the draw_surface (the entire screen here)
     menu.set_center(True, True)
@@ -1058,7 +1058,7 @@ def endMenu():
             return
          else:
             debug("exit")
-            quitGame()
+            mainMenu()
             return
 
       # Quit if the user presses the exit button
@@ -1075,9 +1075,11 @@ def mainMenu():
     global clock
     global screen
     global gameMode
+    screen.fill((0,0,0))
+    pygame.display.update()
     menu = cMenu(0, 0, 0, 10, 'vertical', 5, screen,
                [('Play Game', 1, None),
-                ('High Scores',2,None),
+                #('High Scores',2,None),
                 ('About',3,None),
                 ('Quit',       4, None)])
 
@@ -1094,6 +1096,8 @@ def mainMenu():
     # update the screen (there is no point in updating the entire screen if only
     # a small portion of it changed!)
     rect_list = []
+    title = pygame.image.load(os.path.join("Resources","pyRunnerTitle.gif"))
+    title = title.convert()
     # The main while loop
     while 1:
       # Check if the state has changed, if it has, then post a user event to
@@ -1163,6 +1167,7 @@ def mainMenu():
       if e.type == pygame.QUIT:
          quitGame()
          return
+      rect_list.append(screen.blit(title,(screen.get_rect().centerx-250,0)))  
 
       # Update the screen
       pygame.display.update(rect_list)
