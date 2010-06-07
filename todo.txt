@@ -1,11 +1,9 @@
--Readme
--Level Design Enhancements
+-Readme Ã
+-Level Design Enhancements Ã
 -Sound
--Gun Ammo indicator
--Fix turret system
--Try to do incremental movement speed
--Check turret off screen tests
--frame rate does not disapear 
+-Gun Ammo indicator Ã
+-Fix turret system Ã
+-Check turret off screen tests Ã
+-frame rate does not disappear 
 -some levels are too long
--invcinibility doesn't disapear
--ammo bar
+-invcinibility doesn't disappear

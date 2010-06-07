@@ -553,7 +553,7 @@ class cMenu:
                x_loc = self.x
 
       # Find the smallest Rect that will contain all of the buttons
-      self.contained_rect = self.menu_items[0]['rect'].move(button['offset'])
+      self.contained_rect = pygame.rect.Rect(self.x,self.y,0,0)
       for button in self.menu_items:
          temp_rect = button['rect'].move(button['offset'])
          self.contained_rect.union_ip(temp_rect)
@@ -563,10 +563,8 @@ class cMenu:
       # at the beginning of this function becuase we need to know what the
       # self.contained_rect is to know the correct amount to shift them.
       if self.centeredOnScreen:
-         shift_x = self.x - (self.draw_surface.get_rect()[2] -
-                             self.contained_rect[2]) / 2
-         shift_y = self.y - (self.draw_surface.get_rect()[3] -
-                             self.contained_rect[3]) / 2
+         shift_x = self.x - (self.draw_surface.get_rect()[2]/2)+(self.contained_rect.width/2)
+         shift_y = self.y - (self.draw_surface.get_rect()[3]/2)+(self.contained_rect.height/2)
       elif self.centered:
          shift_x = (self.contained_rect[2]) / 2
          shift_y = (self.contained_rect[3]) / 2
@@ -577,7 +575,7 @@ class cMenu:
                                 button['offset'][1] - shift_y)
 
          # Re-find the smallest Rect that will contain all of the buttons
-         self.contained_rect = self.menu_items[0]['rect'].move(button['offset'])
+         self.contained_rect = pygame.rect.Rect(shift_x*-1,shift_y*-1,0,0)
          for button in self.menu_items:
             temp_rect = button['rect'].move(button['offset'])
             self.contained_rect.union_ip(temp_rect)
@@ -620,12 +618,12 @@ class cMenu:
             self.selection -= n
          elif (o == 'horizontal') and ((s) % n != 0):
             self.selection -= 1
-      elif e.key == pygame.K_r:
-         original_contained_rect = self.remove_buttons([s])
-         if self.selection -1 >= 0:
-            self.selection -= 1
-            self.selection_prev -= 1
-         redraw_full_menu = True
+      # elif e.key == pygame.K_r:
+      #          original_contained_rect = self.remove_buttons([s])
+      #          if self.selection -1 >= 0:
+      #             self.selection -= 1
+      #             self.selection_prev -= 1
+      #          redraw_full_menu = True
       elif e.key == pygame.K_RETURN:
          return [None], self.menu_items[s]['state']
 
@@ -709,7 +707,6 @@ class cMenu:
                                                 button['offset'],
                                                 button['rect'])
             rect_list.append(drawn_rect)
-
       return rect_list
 
 
