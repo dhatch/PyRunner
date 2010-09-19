@@ -32,6 +32,8 @@ import math
 from menu import *
 if platform.system() == 'Windows':
     os.environ['SDL_VIDEODRIVER'] = 'windib'
+# Change the mixer to proper values.
+pygame.mixer.pre_init(44100,-16,2, 1024)
 pygame.init()
 
 ###OPTIMIZATION DOTO
@@ -97,6 +99,20 @@ target_rate = None
 invInd = None
 gameMode = None
 
+# Sound class
+def load_sound(name):
+    class NoneSound:
+        def play(self): pass
+    if not pygame.mixer or not pygame.mixer.get_init():
+        return NoneSound()
+    fullname = os.path.join('Resources', name)
+    try:
+        sound = pygame.mixer.Sound(fullname)
+    except pygame.error, message:
+        print 'Cannot load sound:', fullname
+        raise SystemExit, message
+    return sound
+
 class runner(pygame.sprite.Sprite):
     def __init__(self, screen):
         pygame.sprite.Sprite.__init__(self)
@@ -121,10 +137,15 @@ class runner(pygame.sprite.Sprite):
         self.shots = 0
         self.invCount = 800
         self.ammo = 0
+        
+        # Load the sound
+        self.punch_sound = load_sound("punch.wav")
+        
     def hit(self):
         if not self.inv:
             if not self.flash: #if not already flasshing from a collision
                 self.shield -= 1
+                self.punch_sound.play()
                 if not self.shield == 0:
                     
                     debug("play")
