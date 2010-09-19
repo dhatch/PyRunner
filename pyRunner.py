@@ -140,6 +140,7 @@ class runner(pygame.sprite.Sprite):
         
         # Load the sound
         self.punch_sound = load_sound("punch.wav")
+        self.explosion_sound = load_sound("explosion.wav")
         
     def hit(self):
         if not self.inv:
@@ -153,6 +154,11 @@ class runner(pygame.sprite.Sprite):
                     self.count = 96 #for 96 frames
                     effectsGroup.add(fadeEffect((255,0,0)))
                     mainLevelManager.fallback(400)
+                else:
+                    # Explosion when you lose.
+                    for x in range(6):
+                        self.explosion_sound.play()
+                    
     def update(self):
         #set our own dy to scroller.dx minus 2
         self.dy = scroller.dx - 2
