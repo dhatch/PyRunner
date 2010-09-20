@@ -113,6 +113,25 @@ def load_sound(name):
         raise SystemExit, message
     return sound
 
+#Music support:
+def prepare_music_file(name):
+    fullname = os.path.join('Resources', 'music', name)
+    try:
+        pygame.mixer.music.load(fullname)
+        print "Music file %s loaded!" % fullname
+    except pygame.error:
+        print "File %s not found! (%s)" % (fullname, pygame.get_error())
+    return
+
+def music_play():
+    pygame.mixer.music.play(-1)
+    
+def music_stop():
+    pygame.mixer.music.stop()
+
+def is_music_playing():
+    return pygame.mixer.music.get_busy()
+
 class runner(pygame.sprite.Sprite):
     def __init__(self, screen):
         pygame.sprite.Sprite.__init__(self)
@@ -1147,6 +1166,15 @@ def mainMenu():
     rect_list = []
     title = pygame.image.load(os.path.join("Resources","pyRunnerTitle.gif"))
     title = title.convert()
+    
+    # Test if it is playing a music
+    if is_music_playing():
+        music_stop()
+    
+    # Prepare music for menu
+    prepare_music_file("menu.ogg")
+    music_play()
+    
     # The main while loop
     while 1:
       # Check if the state has changed, if it has, then post a user event to
@@ -1154,6 +1182,7 @@ def mainMenu():
       if prev_state != state:
          pygame.event.post(pygame.event.Event(EVENT_CHANGE_STATE, key = 0))
          prev_state = state
+      
       # Get the next event
       e = pygame.event.wait()
       # Update the menu, based on which "state" we are in - When using the menu
@@ -1190,11 +1219,23 @@ def mainMenu():
             return
         elif state == 5:
             gameMode = 'challenge'
+            
+            # Stop and play the correct music
+            music_stop()
+            prepare_music_file("challenge.ogg")
+            music_play()
+            
             gameInit()
             main()
             return
         elif state == 6:
             gameMode = 'endurance'
+            
+            # Stop and play the correct music
+            music_stop()
+            prepare_music_file("endurance.ogg")
+            music_play()
+            
             gameInit()
             main()
             return
