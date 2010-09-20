@@ -135,9 +135,17 @@ def is_music_playing():
 class runner(pygame.sprite.Sprite):
     def __init__(self, screen):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load(os.path.join(\
+        self.image_original = pygame.image.load(os.path.join(\
             "Resources","runner.bmp"))
-        self.image = self.image.convert()
+        self.image_original=self.image_original.convert()
+        self.image = self.image_original
+        
+        # Invisibility image
+        self.image_invincibility = pygame.image.load(os.path.join(\
+            "Resources","runner_invincibility.bmp"))
+        self.image_invincibility=self.image_invincibility.convert()
+        
+        #self.image = self.image.convert()
         self.rect = self.image.get_rect()
         self.rect.centerx = 70
         if not _debug:
@@ -231,10 +239,12 @@ class runner(pygame.sprite.Sprite):
         if self.invCount == 0:
             self.inv = False
             self.invCount = 800
+            self.image=self.image_original
         if self.shield == 0:
             self.kill()
     def invinc(self):
         self.inv = True
+        self.image=self.image_invincibility
         if self.invCount < 700:
             self.invCount = 800
      
