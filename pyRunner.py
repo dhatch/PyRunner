@@ -1205,7 +1205,7 @@ def mainMenu():
         elif state == 3:
             screen.fill((0,0,0))
             rect_list.append(screen.get_rect())
-            menu = cMenu(0,0,20,10,'vertical',5,screen,[('Code by Brian Erying and David Hatch',7,None),\
+            menu = cMenu(0,0,20,10,'vertical',5,screen,[(u'Code by Brian Erying, David Hatch and Diego Estévez',7,None),\
                                                         ('Images by Dan Austin',7,None),\
                                                         ('Press enter to return',7,None)])
             menu.set_center(True, True)
