@@ -675,6 +675,10 @@ def init():
         screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
     # Ignore mouse motion (greatly reduces resources when not needed)
     pygame.event.set_blocked(pygame.MOUSEMOTION)
+    
+    # Hide the mouse cursor
+    pygame.mouse.set_visible(False)
+    
     clock = pygame.time.Clock()
 def gameInit():
     global screen
