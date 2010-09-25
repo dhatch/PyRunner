@@ -102,6 +102,7 @@ gameMode = None
 highScore = None
 highScoreName = None
 
+
 # Sound class
 def load_sound(name):
     class NoneSound:
@@ -134,6 +135,7 @@ def music_stop():
 
 def is_music_playing():
     return pygame.mixer.music.get_busy()
+
 
 class runner(pygame.sprite.Sprite):
     def __init__(self, screen):
@@ -674,6 +676,7 @@ def init():
     #create screen
     global screen
     global clock
+    pygame.mouse.set_visible(False)
     if(_debug):
         screen = pygame.display.set_mode((600, 820))
     else:
