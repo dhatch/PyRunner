@@ -1,0 +1,8 @@
+# Compiled source in python #
+#############################
+*.pyc
+
+# Music files
+menu.ogg
+endurance.ogg
+challenge.ogg
