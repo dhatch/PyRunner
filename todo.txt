@@ -1,6 +1,3 @@
 -Level Design Enhancements (powerups appear too often)
 -Sound
--frame rate does not disapear 
--invcinibility doesn't disapear
 -high scores
--pause menu
