@@ -1,0 +1,11 @@
+# Compiled source in python #
+#############################
+*.pyc
+
+# Music files
+menu.ogg
+endurance.ogg
+challenge.ogg
+
+#OSX Files
+.DS_Store
