@@ -676,7 +676,6 @@ def init():
     #create screen
     global screen
     global clock
-    pygame.mouse.set_visible(False)
     if(_debug):
         screen = pygame.display.set_mode((600, 820))
     else:
