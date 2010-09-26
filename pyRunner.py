@@ -122,7 +122,7 @@ def prepare_music_file(name):
     fullname = os.path.join('Resources', 'music', name)
     try:
         pygame.mixer.music.load(fullname)
-        print "Music file %s loaded!" % fullname
+        #print "Music file %s loaded!" % fullname
     except pygame.error:
         print "File %s not found! (%s)" % (fullname, pygame.get_error())
     return
