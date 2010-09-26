@@ -98,6 +98,9 @@ displayFrame = None
 target_rate = None
 invInd = None
 gameMode = None
+#HIGH SCORE
+highScore = None
+highScoreName = None
 
 # Sound class
 def load_sound(name):
@@ -312,11 +315,11 @@ class bullet(scroller):
         if top == 1:
             if self.rect.centery > min_height:
                 self.kill()
-                del self
         if top == 0:
             if self.rect.centery < max_height:
                 self.kill()
-                del self
+        if not screen.get_rect().contains(self.image.get_rect()):
+            self.kill()
 #class that displays color and then fades out
 class fadeEffect(pygame.sprite.Sprite):
     def __init__(self,color):
@@ -419,11 +422,13 @@ class gun(scroller):
         pygame.draw.rect(self.image, self.color,self.rect,3)
         self.shots = 10
     def update(self):
+        global screen
         scroller.update(self)
         self.rect.centerx += self._dx
         if self.rect.centerx > pygame.display.get_surface().get_width():
             self.kill()
-            del self
+        if not screen.get_rect().contains(self.image.get_rect()):
+            self.kill()
 class ammoIndicator():
     def __init__(self):
         self.ammoNumber = 0 #define storage of shields
@@ -545,7 +550,7 @@ class randomRezGroup(pygame.sprite.RenderUpdates):
               "\nself.maxRowDistance "+str(self.maxRowDistance)+"\nself.maxRezHeight "+str(self.maxRezHeight)+"\nself.minRezHeight "+str(self.minRezHeight)+\
               "\nself.maxInRow "+str(self.maxInRow))
     def update(self):
-        #override draw method to handle drawing of new rows if needed
+        #override update method to handle drawing of new rows if needed
         if (self.lastRowPosition == -1 or self.lastRowPosition >=self.nextRowPosition) and self.active: 
             #choose random locations for blocks based on maxBlockInRow
             spritesInRow = []
@@ -685,7 +690,12 @@ def init():
         screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
     # Ignore mouse motion (greatly reduces resources when not needed)
     pygame.event.set_blocked(pygame.MOUSEMOTION)
+    
+    # Hide the mouse cursor
+    pygame.mouse.set_visible(False)
+    
     clock = pygame.time.Clock()
+
 def gameInit():
     global screen
     ##VARS DEFINED IN gameInit()
@@ -781,8 +791,9 @@ def gameInit():
         mainLevelManager.add(level({invGroup:[1,5000,10000,300,True]},8,1200))
         mainLevelManager.add(level({turretGroup:[1,3000,5000,300,True]},8,3500))
         mainLevelManager.add(level({turretGroup:[1,2000,4000,300,True]},8,2000))
-        mainLevelManager.add(level({blockGroup:[3,100,200,75,False],shieldGroup:[1,450,600,300,True]},8,1000))
+        mainLevelManager.add(level({blockGroup:[1,100,200,75,True],shieldGroup:[1,450,600,300,True]},16,600))
         mainLevelManager.add(level({blockGroup:[3,75,200,75,True],shieldGroup:[1,4000,7000,300,True]},9,3200))
+        mainLevelManager.add(level({blockGroup:[4,50,250,75,True],shieldGroup:[1,450,600,300,True],invGroup:[1,6000,8000,300,True]},11,4000))
     elif gameMode == "challenge":
         mainLevelManager.add(level({blockGroup:[3,75,200,75,True],cubeGroup:[1,700,2000,300,True],\
                                     invGroup:[1,10000,20000,300,True],shieldGroup:[1,8000,15000,300,True],turretGroup:[1,2000,4000,300,True]\
@@ -876,6 +887,7 @@ def main():
                 if event.dict["key"] == K_f:
                     if displayFrame:
                         displayFrame = False
+                        screen.blit(background,(0,0))
                     else:
                         displayFrame = True
                 if event.dict["key"] == K_p:
@@ -924,6 +936,8 @@ def main():
                 debug("Shield")
             #check for colisions between runner and sprites in block group
             collidedSprites = pygame.sprite.spritecollideany(rungroup.sprite, blockGroup)
+            if not collidedSprites:
+                collidedSprites = pygame.sprite.spritecollideany(rungroup.sprite, turretGroup)
             if collidedSprites and _die:
                 #reduce shields
                 rungroup.sprite.hit()
@@ -936,7 +950,7 @@ def main():
                 rungroup.sprite.gun += 1
                 rungroup.sprite.ammo = 10
         #increment distance
-        score += 0.5
+        score +=  .5
         #increment the number of frames
         frame_count += 1
         #choose distance font
@@ -1008,9 +1022,9 @@ def main():
         screen.blit(background,ammoIndicatorRect, ammoIndicatorRect)
         screen.blit(background, shieldIndicatorRect,shieldIndicatorRect)
         screen.blit(background,speedIndicatorRect,speedIndicatorRect)
+        screen.blit(background,invIndicatorRect,invIndicatorRect)
         if rungroup.sprite:
             if rungroup.sprite.inv:
-                screen.blit(background,invIndicatorRect,invIndicatorRect)
                 invInd.setPercentage((rungroup.sprite.invCount/float(800))*100)
         #check to make sure the cubes arent spawned over the blocks
         rungroup.draw(screen)
@@ -1038,9 +1052,10 @@ def pause():
     global menu
     global clock
     global screen
-    menu = cMenu(0, 0, 10, 10, 'horizontal', 5, screen,
+    menu = cMenu(0, 0, 10, 10, 'vertical', 5, screen,
             [('Continue', 1, None),
-            ('Exit',       2, None)])
+             ("Restart", 3, None),
+             ('Exit',       2, None)])
 
     # Center the menu on the draw_surface (the entire screen here)
     menu.set_center(True, True)
@@ -1074,6 +1089,9 @@ def pause():
                 screen.blit(background,menu.contained_rect,menu.contained_rect)
                 main()
                 return
+            elif state == 3:
+                gameInit()
+                main()
             else:
                 debug("exit")
                 mainMenu()
@@ -1092,6 +1110,12 @@ def endMenu():
     global menu
     global clock
     global screen
+    global highScore
+    global highScoreName
+    global score
+    if score > highScore:
+        highScore = score
+        highScoreRecord()
     menu = cMenu(0, 0, 10, 10, 'horizontal', 5, screen,
                [('Play Again', 1, None),
                 ('Exit',2, None)])
@@ -1111,6 +1135,7 @@ def endMenu():
     rect_list = []
     font = pygame.font.Font(None, 30)
     fontSurface = font.render("Your score is: {0:n}".format(round(score)),True,(255,255,255))
+    highScoreSurface = font.render("High Score: {0:n}".format(round(highScore)),True,(255,255,255))
     # The main while loop
     while 1:
       # Check if the state has changed, if it has, then post a user event to
@@ -1128,6 +1153,8 @@ def endMenu():
             rect_list, state = menu.update(e, state)
             rect_list.append(screen.blit(fontSurface,(screen.get_rect().centerx-(fontSurface.get_width()/2.), \
                              (screen.get_rect().centery)-60,0,0)))
+            rect_list.append(screen.blit(highScoreSurface,(screen.get_rect().centerx-(highScoreSurface.get_width()/2.), \
+            (screen.get_rect().centery)-(fontSurface.get_height())-80)))
          elif state == 1:
             debug("start game")
             state = 0
@@ -1215,7 +1242,7 @@ def mainMenu():
         elif state == 3:
             screen.fill((0,0,0))
             rect_list.append(screen.get_rect())
-            menu = cMenu(0,0,20,10,'vertical',5,screen,[('Code by Brian Erying and David Hatch',7,None),\
+            menu = cMenu(0,0,20,10,'vertical',5,screen,[(u'Code by Brian Erying, David Hatch and Diego Estévez',7,None),\
                                                         ('Images by Dan Austin',7,None),\
                                                         ('Press enter to return',7,None)])
             menu.set_center(True, True)
@@ -1254,7 +1281,7 @@ def mainMenu():
             rect_list.append(screen.get_rect())
             menu = cMenu(0, 0, 20, 10, 'vertical', 5, screen,
                         [('Play Game', 1, None),
-                         #('High Scores',2,None),
+                         #r('High Scores',2,None),
                          ('About',3,None),
                          ('Quit', 4, None)])
             # Center the menu on the draw_surface (the entire screen here)
@@ -1271,7 +1298,10 @@ def mainMenu():
 
       # Update the screen
       pygame.display.update(rect_list)
-      
+
+def highScoreRecord():
+    pass
+   
 def quitGame():
     pygame.display.quit()
 
