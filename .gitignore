@@ -2,11 +2,5 @@
 #############################
 *.pyc
 
-# Music files
-
-<<<<<<< HEAD
-=======
-
 #OSX Files
 .DS_Store
->>>>>>> ff6d6a6... modified git ignore
