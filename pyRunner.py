@@ -29,6 +29,7 @@ import platform
 import random
 import sys
 import math
+import ConfigParser
 from menu import *
 if platform.system() == 'Windows':
     os.environ['SDL_VIDEODRIVER'] = 'windib'
@@ -694,6 +695,9 @@ def init():
     # Hide the mouse cursor
     pygame.mouse.set_visible(False)
     
+    # Load config file
+    highScoreLoad()
+    
     clock = pygame.time.Clock()
 
 def gameInit():
@@ -1299,8 +1303,37 @@ def mainMenu():
       # Update the screen
       pygame.display.update(rect_list)
 
+def highScoreLoad():
+    global highScore
+    
+    if ( os.path.isfile('pyRunner.cfg') is False ):
+        highScore = 0
+        config = ConfigParser.RawConfigParser()
+        
+        # Creating sections.
+        config.add_section("Records")
+        config.set("Records","highScore", "0")
+        
+        with open('pyRunner.cfg', 'wb') as configfile:
+            config.write(configfile)
+    else:
+        config = ConfigParser.RawConfigParser()
+        
+        # Loading config
+        config.read('pyRunner.cfg')
+        highScore = config.getint("Records","highScore")
+
 def highScoreRecord():
-    pass
+    global highScore
+    
+    config = ConfigParser.RawConfigParser()
+    
+    # Creating sections.
+    config.add_section("Records")
+    config.set("Records","highScore", str(int(highScore)))
+
+    with open('pyRunner.cfg', 'wb') as configfile:
+        config.write(configfile)
    
 def quitGame():
     pygame.display.quit()
