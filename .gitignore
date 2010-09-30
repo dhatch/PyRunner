@@ -5,7 +5,10 @@
 #OSX Files
 .DS_Store
 
-pyRunner.cfg
 
 #OSX Files
 .DS_Store
+
+# Configuration file
+pyRunner.cfg
+
