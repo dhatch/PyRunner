@@ -2,7 +2,8 @@
 #############################
 *.pyc
 
-# Music files
 
 #OSX Files
 .DS_Store
+
+pyRunner.cfg
