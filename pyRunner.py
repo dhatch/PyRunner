@@ -1,3 +1,25 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+#       pyRunner.py
+#       
+#       Copyright 2010 dhatch387 (David Hatch) <dhatch387@gmail.com>
+#       
+#       This program is free software; you can redistribute it and/or modify
+#       it under the terms of the GNU General Public License as published by
+#       the Free Software Foundation; either version 2 of the License, or
+#       (at your option) any later version.
+#       
+#       This program is distributed in the hope that it will be useful,
+#       but WITHOUT ANY WARRANTY; without even the implied warranty of
+#       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#       GNU General Public License for more details.
+#       
+#       You should have received a copy of the GNU General Public License
+#       along with this program; if not, write to the Free Software
+#       Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+#       MA 02110-1301, USA.
+
 import pygame
 from pygame.locals import*
 #import key names
@@ -10,6 +32,8 @@ import math
 from menu import *
 if platform.system() == 'Windows':
     os.environ['SDL_VIDEODRIVER'] = 'windib'
+# Change the mixer to proper values.
+pygame.mixer.pre_init(44100,-16,2, 1024)
 pygame.init()
 
 ###OPTIMIZATION DOTO
@@ -78,6 +102,39 @@ gameMode = None
 highScore = None
 highScoreName = None
 
+# Sound class
+def load_sound(name):
+    class NoneSound:
+        def play(self): pass
+    if not pygame.mixer or not pygame.mixer.get_init():
+        return NoneSound()
+    fullname = os.path.join('Resources', name)
+    try:
+        sound = pygame.mixer.Sound(fullname)
+    except pygame.error, message:
+        print 'Cannot load sound:', fullname
+        raise SystemExit, message
+    return sound
+
+#Music support:
+def prepare_music_file(name):
+    fullname = os.path.join('Resources', 'music', name)
+    try:
+        pygame.mixer.music.load(fullname)
+        print "Music file %s loaded!" % fullname
+    except pygame.error:
+        print "File %s not found! (%s)" % (fullname, pygame.get_error())
+    return
+
+def music_play():
+    pygame.mixer.music.play(-1)
+    
+def music_stop():
+    pygame.mixer.music.stop()
+
+def is_music_playing():
+    return pygame.mixer.music.get_busy()
+
 class runner(pygame.sprite.Sprite):
     def __init__(self, screen):
         pygame.sprite.Sprite.__init__(self)
@@ -102,10 +159,16 @@ class runner(pygame.sprite.Sprite):
         self.shots = 0
         self.invCount = 800
         self.ammo = 0
+        
+        # Load the sound
+        self.punch_sound = load_sound("punch.wav")
+        self.explosion_sound = load_sound("explosion.wav")
+        
     def hit(self):
         if not self.inv:
             if not self.flash: #if not already flasshing from a collision
                 self.shield -= 1
+                self.punch_sound.play()
                 if not self.shield == 0:
                     
                     debug("play")
@@ -113,6 +176,11 @@ class runner(pygame.sprite.Sprite):
                     self.count = 96 #for 96 frames
                     effectsGroup.add(fadeEffect((255,0,0)))
                     mainLevelManager.fallback(400)
+                else:
+                    # Explosion when you lose.
+                    for x in range(6):
+                        self.explosion_sound.play()
+                    
     def update(self):
         #set our own dy to scroller.dx minus 2
         self.dy = scroller.dx - 2
@@ -606,13 +674,16 @@ def init():
     #create screen
     global screen
     global clock
-    pygame.mouse.set_visible(False)
     if(_debug):
         screen = pygame.display.set_mode((600, 820))
     else:
         screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
     # Ignore mouse motion (greatly reduces resources when not needed)
     pygame.event.set_blocked(pygame.MOUSEMOTION)
+    
+    # Hide the mouse cursor
+    pygame.mouse.set_visible(False)
+    
     clock = pygame.time.Clock()
 
 def gameInit():
@@ -1122,6 +1193,15 @@ def mainMenu():
     rect_list = []
     title = pygame.image.load(os.path.join("Resources","pyRunnerTitle.gif"))
     title = title.convert()
+    
+    # Test if it is playing a music
+    if is_music_playing():
+        music_stop()
+    
+    # Prepare music for menu
+    prepare_music_file("menu.ogg")
+    music_play()
+    
     # The main while loop
     while 1:
       # Check if the state has changed, if it has, then post a user event to
@@ -1129,6 +1209,7 @@ def mainMenu():
       if prev_state != state:
          pygame.event.post(pygame.event.Event(EVENT_CHANGE_STATE, key = 0))
          prev_state = state
+      
       # Get the next event
       e = pygame.event.wait()
       # Update the menu, based on which "state" we are in - When using the menu
@@ -1151,7 +1232,7 @@ def mainMenu():
         elif state == 3:
             screen.fill((0,0,0))
             rect_list.append(screen.get_rect())
-            menu = cMenu(0,0,20,10,'vertical',5,screen,[('Code by Brian Erying and David Hatch',7,None),\
+            menu = cMenu(0,0,20,10,'vertical',5,screen,[(u'Code by Brian Erying, David Hatch and Diego Estévez',7,None),\
                                                         ('Images by Dan Austin',7,None),\
                                                         ('Press enter to return',7,None)])
             menu.set_center(True, True)
@@ -1165,11 +1246,23 @@ def mainMenu():
             return
         elif state == 5:
             gameMode = 'challenge'
+            
+            # Stop and play the correct music
+            music_stop()
+            prepare_music_file("challenge.ogg")
+            music_play()
+            
             gameInit()
             main()
             return
         elif state == 6:
             gameMode = 'endurance'
+            
+            # Stop and play the correct music
+            music_stop()
+            prepare_music_file("endurance.ogg")
+            music_play()
+            
             gameInit()
             main()
             return
