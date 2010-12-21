@@ -29,6 +29,7 @@ import platform
 import random
 import sys
 import math
+import ConfigParser
 from menu import *
 if platform.system() == 'Windows':
     os.environ['SDL_VIDEODRIVER'] = 'windib'
@@ -121,7 +122,7 @@ def prepare_music_file(name):
     fullname = os.path.join('Resources', 'music', name)
     try:
         pygame.mixer.music.load(fullname)
-        print "Music file %s loaded!" % fullname
+        #print "Music file %s loaded!" % fullname
     except pygame.error:
         print "File %s not found! (%s)" % (fullname, pygame.get_error())
     return
@@ -138,9 +139,17 @@ def is_music_playing():
 class runner(pygame.sprite.Sprite):
     def __init__(self, screen):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load(os.path.join(\
+        self.image_original = pygame.image.load(os.path.join(\
             "Resources","runner.bmp"))
-        self.image = self.image.convert()
+        self.image_original=self.image_original.convert()
+        self.image = self.image_original
+        
+        # Invisibility image
+        self.image_invincibility = pygame.image.load(os.path.join(\
+            "Resources","runner_invincibility.bmp"))
+        self.image_invincibility=self.image_invincibility.convert()
+        
+        #self.image = self.image.convert()
         self.rect = self.image.get_rect()
         self.rect.centerx = 70
         if not _debug:
@@ -234,10 +243,12 @@ class runner(pygame.sprite.Sprite):
         if self.invCount == 0:
             self.inv = False
             self.invCount = 800
+            self.image=self.image_original
         if self.shield == 0:
             self.kill()
     def invinc(self):
         self.inv = True
+        self.image=self.image_invincibility
         if self.invCount < 700:
             self.invCount = 800
      
@@ -684,6 +695,9 @@ def init():
     # Hide the mouse cursor
     pygame.mouse.set_visible(False)
     
+    # Load config file
+    highScoreLoad()
+    
     clock = pygame.time.Clock()
 
 def gameInit():
@@ -723,7 +737,7 @@ def gameInit():
     ##INITIALIZATION CODE    
     mainLevelManager = levelManager()
     gunner = pygame.image.load(os.path.join(\
-            "Resources","gunner.bmp"))
+            "Resources","Gunner.bmp"))
     gunner = gunner.convert()
     gunner.set_colorkey((0,0,0))
     background = pygame.Surface((screen.get_width(), screen.get_height()))
@@ -1290,8 +1304,37 @@ def mainMenu():
       # Update the screen
       pygame.display.update(rect_list)
 
+def highScoreLoad():
+    global highScore
+    
+    if ( os.path.isfile('pyRunner.cfg') is False ):
+        highScore = 0
+        config = ConfigParser.RawConfigParser()
+        
+        # Creating sections.
+        config.add_section("Records")
+        config.set("Records","highScore", "0")
+        
+        with open('pyRunner.cfg', 'wb') as configfile:
+            config.write(configfile)
+    else:
+        config = ConfigParser.RawConfigParser()
+        
+        # Loading config
+        config.read('pyRunner.cfg')
+        highScore = config.getint("Records","highScore")
+
 def highScoreRecord():
-    pass
+    global highScore
+    
+    config = ConfigParser.RawConfigParser()
+    
+    # Creating sections.
+    config.add_section("Records")
+    config.set("Records","highScore", str(int(highScore)))
+
+    with open('pyRunner.cfg', 'wb') as configfile:
+        config.write(configfile)
    
 def quitGame():
     pygame.display.quit()
