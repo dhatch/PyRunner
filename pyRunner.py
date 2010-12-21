@@ -1261,12 +1261,13 @@ def mainMenu():
             gameInit()
             main()
             return
+        
         elif state == 6:
             gameMode = 'endurance'
             
             # Stop and play the correct music
             music_stop()
-            prepare_music_file("endurance.ogg")
+            prepare_music_file("endurance_new.ogg")
             music_play()
             
             gameInit()
