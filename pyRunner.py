@@ -29,6 +29,7 @@ import platform
 import random
 import sys
 import math
+import ConfigParser
 from menu import *
 if platform.system() == 'Windows':
     os.environ['SDL_VIDEODRIVER'] = 'windib'
@@ -102,6 +103,7 @@ gameMode = None
 highScore = None
 highScoreName = None
 
+
 # Sound class
 def load_sound(name):
     class NoneSound:
@@ -121,7 +123,7 @@ def prepare_music_file(name):
     fullname = os.path.join('Resources', 'music', name)
     try:
         pygame.mixer.music.load(fullname)
-        print "Music file %s loaded!" % fullname
+        #print "Music file %s loaded!" % fullname
     except pygame.error:
         print "File %s not found! (%s)" % (fullname, pygame.get_error())
     return
@@ -134,6 +136,7 @@ def music_stop():
 
 def is_music_playing():
     return pygame.mixer.music.get_busy()
+
 
 class runner(pygame.sprite.Sprite):
     def __init__(self, screen):
@@ -683,6 +686,9 @@ def init():
     
     # Hide the mouse cursor
     pygame.mouse.set_visible(False)
+    
+    # Load config file
+    highScoreLoad()
     
     clock = pygame.time.Clock()
 
@@ -1255,12 +1261,13 @@ def mainMenu():
             gameInit()
             main()
             return
+        
         elif state == 6:
             gameMode = 'endurance'
             
             # Stop and play the correct music
             music_stop()
-            prepare_music_file("endurance.ogg")
+            prepare_music_file("endurance_new.ogg")
             music_play()
             
             gameInit()
@@ -1289,8 +1296,37 @@ def mainMenu():
       # Update the screen
       pygame.display.update(rect_list)
 
+def highScoreLoad():
+    global highScore
+    
+    if ( os.path.isfile('pyRunner.cfg') is False ):
+        highScore = 0
+        config = ConfigParser.RawConfigParser()
+        
+        # Creating sections.
+        config.add_section("Records")
+        config.set("Records","highScore", "0")
+        
+        with open('pyRunner.cfg', 'wb') as configfile:
+            config.write(configfile)
+    else:
+        config = ConfigParser.RawConfigParser()
+        
+        # Loading config
+        config.read('pyRunner.cfg')
+        highScore = config.getint("Records","highScore")
+
 def highScoreRecord():
-    pass
+    global highScore
+    
+    config = ConfigParser.RawConfigParser()
+    
+    # Creating sections.
+    config.add_section("Records")
+    config.set("Records","highScore", str(int(highScore)))
+
+    with open('pyRunner.cfg', 'wb') as configfile:
+        config.write(configfile)
    
 def quitGame():
     pygame.display.quit()
