@@ -1255,7 +1255,7 @@ def mainMenu():
             
             # Stop and play the correct music
             music_stop()
-            prepare_music_file("challenge.ogg")
+            prepare_music_file("challenge_new.ogg")
             music_play()
             
             gameInit()
