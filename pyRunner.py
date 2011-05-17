@@ -729,7 +729,7 @@ def gameInit():
     ##INITIALIZATION CODE    
     mainLevelManager = levelManager()
     gunner = pygame.image.load(os.path.join(\
-            "Resources","gunner.bmp"))
+            "Resources","Gunner.bmp"))
     gunner = gunner.convert()
     gunner.set_colorkey((0,0,0))
     background = pygame.Surface((screen.get_width(), screen.get_height()))
