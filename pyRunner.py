@@ -772,7 +772,10 @@ def gameInit():
     shieldGroup = randomRezGroup(shieldCube,maxRezHeight=blockMaxHeight,minRezHeight=blockMinHeight)
     turretGroup = randomRezGroup(turret,maxRezHeight = blockMaxHeight,minRezHeight=blockMinHeight)
     gunGroup = randomRezGroup(gunCube,maxRezHeight = blockMaxHeight,minRezHeight = blockMinHeight)
-    effectsGroup = WorkingSingle() #group to store effects in
+    if platform.system() == 'Darwin':
+        effectsGroup = pygame.sprite.GroupSingle()
+    else:
+        effectsGroup = WorkingSingle() #group to store effects in
     bulletGroup = pygame.sprite.RenderUpdates()
     gunnerGroup = pygame.sprite.RenderUpdates()
     ##LEVEL CREATION AND DESIGN
