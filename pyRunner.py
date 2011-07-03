@@ -511,18 +511,6 @@ class progressIndicator():
         self.percent = percent
         debug(str(self.percent))
 
-#The pygame GroupSingle has a error in its code such that when a sprite is added to the group, the other sprites will cause some form of memory leak instead
-#of being properly disposed of. This class emulates the behavior of the GroupSingle's add method but functions properly.
-class WorkingSingle(pygame.sprite.Group):
-    def add(self,*sprites):
-        if self.sprites():
-            self.sprites()[0].kill()
-        try:
-            spriteAdd = sprites[0]
-        except IndexError:
-            spriteAdd = ()
-        pygame.sprite.Group.add(self,spriteAdd)
-
 #special group class to manage rezzing of objects that are randomly created, objects in the group must have a initialalizer of (self,y)
 class randomRezGroup(pygame.sprite.RenderUpdates):
     def __init__(self,templateClass,maxRezHeight,minRezHeight,maxInRow=3,minDistance=75,minRowDistance=100,\
