@@ -1184,6 +1184,7 @@ def mainMenu():
                [('Play Game', 1, None),
                 #('High Scores',2,None),
                 ('About',3,None),
+                ('How to play',8,None),
                 ('Quit',       4, None)])
 
     # Center the menu on the draw_surface (the entire screen here)
@@ -1282,11 +1283,30 @@ def mainMenu():
                         [('Play Game', 1, None),
                          #r('High Scores',2,None),
                          ('About',3,None),
+                         ('How to play',8,None),
                          ('Quit', 4, None)])
             # Center the menu on the draw_surface (the entire screen here)
             menu.set_center(True, True)
             # Center the menu on the draw_surface (the entire screen here)
             menu.set_alignment('center', 'center')
+            state = 0
+            prev_state = 1
+        elif state == 8:
+            screen.fill((0,0,0))
+            rect_list.append(screen.get_rect())
+            menu = cMenu(0,0,0,5,'vertical',10,screen,[('How to play:',7,None),\
+                                                        ('Use the up and down arrow keys to avoid the solid blocks, enemies, and bullets.',7,None),\
+                                                        ('Gain points and special abilities from the hollow cubes.',7,None),\
+                                                        ('',7,None),\
+                                                        ('Special abilities:',7,None),\
+                                                        ('Light blue = extra shield',7,None),\
+                                                        ('Red = gun',7,None),\
+                                                        ('White = invincibility',7,None),\
+                                                        ('',7,None),\
+                                                        ('Press enter to return',7,None)])
+            menu.set_center(True, True)
+            menu.set_alignment('center', 'center')
+            menu.set_selected_color((255,255,255))
             state = 0
             prev_state = 1
       # Quit if the user presses the exit button
