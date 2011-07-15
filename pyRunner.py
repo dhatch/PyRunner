@@ -101,8 +101,7 @@ invInd = None
 gameMode = None
 #HIGH SCORE
 highScore = None
-highScoreName = None
-
+score_type = None
 
 # Sound class
 def load_sound(name):
@@ -670,6 +669,7 @@ def init():
     #create screen
     global screen
     global clock
+    global score_type
     if(_debug):
         screen = pygame.display.set_mode((600, 820))
     else:
@@ -681,7 +681,7 @@ def init():
     pygame.mouse.set_visible(False)
     
     # Load config file
-    highScoreLoad()
+    #highScoreLoad()
     
     clock = pygame.time.Clock()
 
@@ -719,6 +719,7 @@ def gameInit():
     global invInd
     #Globals defined in mainMenu()
     global gameMode
+    global score_type
     ##INITIALIZATION CODE    
     mainLevelManager = levelManager()
     gunner = pygame.image.load(os.path.join(\
@@ -840,6 +841,7 @@ def main():
     global displayFrame
     global target_rate
     global invInd
+    global score_type
     #run loop
     while 1:
         #check to make sure our runner still exists
@@ -1041,6 +1043,7 @@ def pause():
     global menu
     global clock
     global screen
+    global score_type
     menu = cMenu(0, 0, 10, 10, 'vertical', 5, screen,
             [('Continue', 1, None),
              ("Restart", 3, None),
@@ -1100,11 +1103,11 @@ def endMenu():
     global clock
     global screen
     global highScore
-    global highScoreName
     global score
+    global score_type
     if score > highScore:
         highScore = score
-        highScoreRecord()
+    ranking(score)
     menu = cMenu(0, 0, 10, 10, 'horizontal', 5, screen,
                [('Play Again', 1, None),
                 ('Exit',2, None)])
@@ -1123,7 +1126,7 @@ def endMenu():
     # a small portion of it changed!)
     rect_list = []
     font = pygame.font.Font(None, 30)
-    fontSurface = font.render("Your score is: {0:n}".format(round(score)),True,(255,255,255))
+    fontSurface = font.render("Your score is: {0:n}".format(int(score)),True,(255,255,255))
     highScoreSurface = font.render("High Score: {0:n}".format(round(highScore)),True,(255,255,255))
     # The main while loop
     while 1:
@@ -1140,10 +1143,18 @@ def endMenu():
       if e.type == pygame.KEYDOWN or e.type == EVENT_CHANGE_STATE:
          if state == 0:
             rect_list, state = menu.update(e, state)
+
             rect_list.append(screen.blit(fontSurface,(screen.get_rect().centerx-(fontSurface.get_width()/2.), \
                              (screen.get_rect().centery)-60,0,0)))
+
             rect_list.append(screen.blit(highScoreSurface,(screen.get_rect().centerx-(highScoreSurface.get_width()/2.), \
             (screen.get_rect().centery)-(fontSurface.get_height())-80)))
+
+	    for i in range(2,11):
+                scores = font.render(get_scores(str(i)),True,(255,255,255))
+                rect_list.append(screen.blit(scores,(screen.get_rect().centerx-(scores.get_width()/2.), \
+                (screen.get_rect().centery)-(fontSurface.get_height())+(i*25))))
+
          elif state == 1:
             debug("start game")
             state = 0
@@ -1169,6 +1180,7 @@ def mainMenu():
     global clock
     global screen
     global gameMode
+    global score_type
     screen.fill((0,0,0))
     pygame.display.update()
     menu = cMenu(0, 0, 0, 10, 'vertical', 5, screen,
@@ -1251,6 +1263,9 @@ def mainMenu():
             music_stop()
             prepare_music_file("challenge_new.ogg")
             music_play()
+	    # Set game type for score
+	    score_type = 'challenge'
+            highScoreLoad()
             
             gameInit()
             main()
@@ -1263,6 +1278,9 @@ def mainMenu():
             music_stop()
             prepare_music_file("endurance_new.ogg")
             music_play()
+	    # Set game type for score
+	    score_type = 'endurance'
+            highScoreLoad()
             
             gameInit()
             main()
@@ -1311,36 +1329,64 @@ def mainMenu():
 
 def highScoreLoad():
     global highScore
-    
+    #score_type is set when the mode of play is determined ("challenge" for example).
+    global score_type
+   
+    #If the file does not exist, create it
     if ( os.path.isfile('pyRunner.cfg') is False ):
-        highScore = 0
         config = ConfigParser.RawConfigParser()
-        
-        # Creating sections.
-        config.add_section("Records")
-        config.set("Records","highScore", "0")
-        
         with open('pyRunner.cfg', 'wb') as configfile:
             config.write(configfile)
-    else:
-        config = ConfigParser.RawConfigParser()
-        
-        # Loading config
-        config.read('pyRunner.cfg')
-        highScore = config.getint("Records","highScore")
 
-def highScoreRecord():
-    global highScore
-    
-    config = ConfigParser.RawConfigParser()
-    
-    # Creating sections.
-    config.add_section("Records")
-    config.set("Records","highScore", str(int(highScore)))
+    #If the section does not exist, create it.
+    config = ConfigParser.ConfigParser()
+    config.readfp(open('pyRunner.cfg'))
+    if not ( config.has_section(score_type) ):
+        # Creating the needed section.
+        config.add_section(score_type)
+        config.set(score_type,"1", "0")
+        config.set(score_type,"2", "0")
+        config.set(score_type,"3", "0")
+        config.set(score_type,"4", "0")
+        config.set(score_type,"5", "0")
+        config.set(score_type,"6", "0")
+        config.set(score_type,"7", "0")
+        config.set(score_type,"8", "0")
+        config.set(score_type,"9", "0")
+        config.set(score_type,"10", "0")
+        with open('pyRunner.cfg', 'wb') as configfile:
+            config.write(configfile)
 
-    with open('pyRunner.cfg', 'wb') as configfile:
-        config.write(configfile)
+    highScore = config.getint(score_type,"1")
+
+def ranking(score):
+    global score_type
+    replaced_score = ""
+
+    config = ConfigParser.ConfigParser()
+    config.readfp(open('pyRunner.cfg'))
    
+    for i in range(1, 11):
+	if ( int(score) > int(config.get(score_type, str(i))) ): 
+	    #store the value I am about to replace
+	    replaced_score = config.get(score_type, str(i))
+	    #replace the value in the list
+	    config.set(score_type, str(i), str(int(score))) 
+	    with open('pyRunner.cfg', 'wb') as configfile:
+		config.write(configfile)
+	    #find the replaced score's new place in the list
+	    ranking(replaced_score)
+	    #immediatly end the loop when the recursion unwinds
+	    break
+
+def get_scores(standing):
+    global score_type
+
+    config = ConfigParser.ConfigParser()
+    config.readfp(open('pyRunner.cfg'))
+    if ( config.has_section(score_type) ):
+        return '%-10s%s' % (standing, config.get(score_type, standing))
+
 def quitGame():
     pygame.display.quit()
 
