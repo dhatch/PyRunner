@@ -165,6 +165,7 @@ class runner(pygame.sprite.Sprite):
         # Load the sound
         self.punch_sound = load_sound("punch.wav")
         self.explosion_sound = load_sound("explosion.wav")
+	self.gun_sound = load_sound("gunshot.wav")
         
     def hit(self):
         if not self.inv:
@@ -182,7 +183,7 @@ class runner(pygame.sprite.Sprite):
                 else:
                     # Explosion when you lose.
                     for x in range(6):
-                        self.explosion_sound.play()
+                        self.gun_sound.play()
                     
     def update(self):
         #set our own dy to scroller.dx minus 2
@@ -213,6 +214,7 @@ class runner(pygame.sprite.Sprite):
                         self.last_shot = 0
                         debug("gunnerGroup" + str(gunnerGroup))
                         self.ammo -= 1
+			self.gun_sound.play()
         #clip to our max and min heights created when we make borders
         if self.rect.top < max_height+1:
             self.rect.top = max_height+1
@@ -280,6 +282,8 @@ class turret(scroller):
         self.count += 1
         if self.count == 25:
             bulletGroup.add(bullet(self.rect.centerx,self.rect.centery,self.angle))
+	    self.gun_sound = load_sound("gunshot.wav")
+	    self.gun_sound.play()
             debug(str(bulletGroup))
             self.count = 0
         if self.rect.right < 0: #same code to delete self if off screen as block
