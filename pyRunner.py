@@ -339,10 +339,7 @@ class fadeEffect(pygame.sprite.Sprite):
 class block(scroller):
     def __init__(self, y):
         scroller.__init__(self)
-        self.side1 = random.randint(20,100)
-        self.side2 = 20
-        self.dimensions = random.choice([(self.side1,self.side2),(self.side2,self.side1)])
-        self.image = pygame.Surface(self.dimensions)
+        self.image = pygame.Surface((20, 90))
         self.rect = self.image.get_rect()
         self.y = y
         pygame.draw.rect(self.image, (28,55,183), self.rect)
