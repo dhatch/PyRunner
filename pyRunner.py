@@ -177,7 +177,6 @@ class runner(pygame.sprite.Sprite):
                     debug("play")
                     self.flash = True #start flashing
                     self.count = 96 #for 96 frames
-                    effectsGroup.empty()
                     effectsGroup.add(fadeEffect((255,0,0)))
                     mainLevelManager.fallback(400)
                 else:
@@ -373,7 +372,6 @@ class cube(scroller):
     def y(self): #y accessor
         return self.y
     def hit(self):
-        effectsGroup.empty()
         effectsGroup.add(fadeEffect(self.color))
 class scoreCube(cube):
     scoreProbabilites = [500,500,500,500,1000,1000,2000] #define probablility list for scores
