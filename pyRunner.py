@@ -518,8 +518,7 @@ class progressIndicator():
 #of being properly disposed of. This class emulates the behavior of the GroupSingle's add method but functions properly.
 class WorkingSingle(pygame.sprite.Group):
     def add(self,*sprites):
-        if self.sprites():
-            self.sprites()[0].kill()
+        self.empty()
         try:
             spriteAdd = sprites[0]
         except IndexError:
