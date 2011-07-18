@@ -520,8 +520,8 @@ class WorkingSingle(pygame.sprite.Group):
         try:
             spriteAdd = sprites[0]
         except IndexError:
-            spriteAdd = ()
-        pygame.sprite.Group.add(self,spriteAdd)
+            return None
+        super(WorkingSingle, self).add(spriteAdd)
 
 #special group class to manage rezzing of objects that are randomly created, objects in the group must have a initialalizer of (self,y)
 class randomRezGroup(pygame.sprite.RenderUpdates):

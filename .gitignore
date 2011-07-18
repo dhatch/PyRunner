@@ -6,5 +6,5 @@
 .DS_Store
 
 # Configuration file
-pyRunner.cfg
+*.cfg
 
