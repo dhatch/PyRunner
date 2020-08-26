@@ -519,6 +519,7 @@ class WorkingSingle(pygame.sprite.Group):
             spriteAdd = sprites[0]
         except IndexError:
             spriteAdd = ()
+
         pygame.sprite.Group.add(self,spriteAdd)
 
 #special group class to manage rezzing of objects that are randomly created, objects in the group must have a initialalizer of (self,y)
@@ -772,7 +773,7 @@ def gameInit():
     shieldGroup = randomRezGroup(shieldCube,maxRezHeight=blockMaxHeight,minRezHeight=blockMinHeight)
     turretGroup = randomRezGroup(turret,maxRezHeight = blockMaxHeight,minRezHeight=blockMinHeight)
     gunGroup = randomRezGroup(gunCube,maxRezHeight = blockMaxHeight,minRezHeight = blockMinHeight)
-    effectsGroup = WorkingSingle() #group to store effects in
+    effectsGroup = pygame.sprite.GroupSingle()
     bulletGroup = pygame.sprite.RenderUpdates()
     gunnerGroup = pygame.sprite.RenderUpdates()
     ##LEVEL CREATION AND DESIGN
